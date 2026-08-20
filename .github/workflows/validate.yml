@@ -1,0 +1,58 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate repository
+        run: python3 scripts/validate_repo.py
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Build release package
+        run: python3 scripts/package_release.py --clean
+
+      - name: Validate with GitHub CLI skill publisher when available
+        shell: bash
+        run: |
+          if gh skill publish --help >/dev/null 2>&1; then
+            gh skill publish . --dry-run
+          else
+            echo "gh skill is not available on this runner; repository validation already passed."
+          fi
+
+      - name: Upload release package
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: oneshot-skill
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 7

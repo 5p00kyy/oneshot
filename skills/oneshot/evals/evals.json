@@ -1,0 +1,45 @@
+{
+  "skill_name": "oneshot",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Research and write a one-shot prompt for Codex to build a polished, expandable browser RTS inspired by the strategic feel of classic historical RTS games. It must be original, repository-based, tested in a browser, and ready for future content expansion.",
+      "expected_output": "A cited research synthesis and a copy-ready repository-build prompt. The prompt should distinguish high-level genre inspiration from protected expression, verify a current browser-game stack, define a complete playable v0.1 critical path, require real browser testing and visual inspection, establish performance and asset-pipeline constraints, include priorities and cut order, and leave an extensible architecture rather than demanding a single file."
+    },
+    {
+      "id": 2,
+      "prompt": "Turn this rough idea into a master one-shot: migrate our existing TypeScript monolith to event-driven services without downtime. The agent will have the repository, terminal, cloud docs, and staging access.",
+      "expected_output": "The agent should inspect the repository before prescribing architecture, research current platform constraints, preserve behavioral invariants, define a phased migration with characterization tests, compatibility adapters, data reconciliation, observability, rollout, rollback, approval boundaries for cloud writes, and an evidence-based handoff. It should not propose a greenfield rewrite from assumptions."
+    },
+    {
+      "id": 3,
+      "prompt": "Write an extensive one-shot prompt for a research agent to determine whether small modular reactors are economically competitive for remote Australian mining operations in 2035.",
+      "expected_output": "A source-grounded research prompt that defines the decision, geography, date assumptions, cost boundaries, scenario methodology, primary-source hierarchy, regulatory and fuel-cycle factors, competing technologies, uncertainty and sensitivity analysis, citation rules, contradiction handling, and a decision-ready output. It should not predetermine the conclusion."
+    },
+    {
+      "id": 4,
+      "prompt": "Make a one-shot prompt for an agent to build a three-statement financial forecast workbook for a subscription software company from the files I provide.",
+      "expected_output": "A prompt targeted to an artifact-capable agent that inspects the supplied files, defines the source-of-truth data model, assumptions, cohort or revenue logic, integrated statements, balance checks, scenarios, audit flags, charts, documentation, and spreadsheet validation. It should require formulas rather than hard-coded outputs and preserve file provenance."
+    },
+    {
+      "id": 5,
+      "prompt": "Audit and rewrite my existing 18,000-word autonomous app-build prompt. It repeats itself, pins old dependencies, and the generated apps look good but rarely finish the onboarding and payment flows.",
+      "expected_output": "A research-backed unified replacement prompt, not just comments. It should preserve useful intent, verify current APIs, remove duplication, prioritize the complete onboarding-to-payment journey, define safe payment test behavior, require browser and end-to-end validation, add fallback and error states, and shorten material that does not alter execution."
+    },
+    {
+      "id": 6,
+      "prompt": "Create a one-shot prompt for an agent to produce a feature-length documentary script about a living public figure using current sources and archival material.",
+      "expected_output": "A prompt that defines audience, thesis, source and rights policy, factual verification, chronology, interviews or archival treatment, disputed claims, legal and privacy review, narrative structure, original voice, citation or source notes, revision passes, and a complete ending. It should not direct imitation or unlicensed copying."
+    },
+    {
+      "id": 7,
+      "prompt": "I need a one-shot prompt that automates weekly project-status reporting from Gmail, Calendar, GitHub, and our issue tracker, then drafts a report for approval before sending.",
+      "expected_output": "A workflow prompt that verifies connected tools, reads before writing, defines data windows and deduplication, reconciles conflicting status signals, handles permissions and partial failures, produces an auditable draft, requires approval before external send, avoids duplicate side effects, and reports exactly what sources were used."
+    },
+    {
+      "id": 8,
+      "prompt": "Write a concise one-shot prompt for a model to generate ten original names and taglines for a small coffee shop. No research needed.",
+      "expected_output": "A compact prompt, not an enormous repository-style specification. It should capture audience, brand qualities, originality, constraints, output format, and a quick self-check while avoiding unnecessary browsing, phases, CI, or implementation architecture."
+    }
+  ]
+}

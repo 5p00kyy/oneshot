@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a measured improvement to OneShot
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Failure mode or unmet need
+      description: Describe the recurring problem rather than only the desired implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Representative request
+      description: Provide a sanitized request that demonstrates the gap.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+    validations:
+      required: true
+  - type: textarea
+    id: evaluation
+    attributes:
+      label: How should it be evaluated?
+      description: Suggest trigger cases, output assertions, rubric changes, or comparisons.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: This remains a prompt-authoring feature rather than direct execution of the underlying task.
+          required: true

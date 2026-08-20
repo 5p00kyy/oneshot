@@ -1,0 +1,139 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Verify release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag must use vMAJOR.MINOR.PATCH: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          TAG_TYPE=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${GITHUB_REF_NAME}" --jq .object.type)
+          if [ "${TAG_TYPE}" != "tag" ]; then
+            echo "Release tag must be annotated: ${GITHUB_REF_NAME}" >&2
+            exit 1
+          fi
+          git fetch origin main --no-tags
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "Release commit is not reachable from main: ${GITHUB_SHA}" >&2
+            exit 1
+          fi
+
+      - name: Validate repository
+        run: python3 scripts/validate_repo.py
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Verify tag matches skill version
+        shell: bash
+        run: |
+          VERSION=$(python3 - <<'PY'
+          import re
+          from pathlib import Path
+          text = Path("skills/oneshot/SKILL.md").read_text(encoding="utf-8")
+          match = re.search(r'(?m)^\s{2}version:\s*["\x27]?([^"\x27\s]+)', text)
+          if not match:
+              raise SystemExit("metadata.version not found")
+          print(match.group(1))
+          PY
+          )
+          if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match skill version v${VERSION}" >&2
+            exit 1
+          fi
+
+      - name: Build and verify release package
+        shell: bash
+        run: |
+          python3 scripts/package_release.py --clean
+          (cd dist && sha256sum -c *.sha256)
+
+      - name: Attest release package provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: |
+            dist/*.zip
+            dist/*.sha256
+
+      - name: Upload verified release package
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified release package
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: release-${{ github.ref_name }}
+          path: release
+
+      - name: Verify downloaded package
+        shell: bash
+        run: (cd release && sha256sum -c *.sha256)
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          if gh release view "${TAG}" --repo "${REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release already exists and will not be modified: ${TAG}" >&2
+            exit 1
+          fi
+          gh release create "${TAG}" \
+            release/*.zip \
+            release/*.sha256 \
+            --repo "${REPOSITORY}" \
+            --title "OneShot ${TAG}" \
+            --generate-notes \
+            --fail-on-no-commits \
+            --verify-tag

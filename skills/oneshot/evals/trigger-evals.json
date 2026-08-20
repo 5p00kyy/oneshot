@@ -1,0 +1,80 @@
+{
+  "skill_name": "oneshot",
+  "cases": [
+    {
+      "prompt": "Write me a deeply researched one-shot prompt for an agent to build this game.",
+      "should_trigger": true,
+      "reason": "Explicit one-shot prompt request."
+    },
+    {
+      "prompt": "Create a master prompt that makes Codex inspect, migrate, test, and document this repository.",
+      "should_trigger": true,
+      "reason": "Explicit master prompt for autonomous agent execution."
+    },
+    {
+      "prompt": "Refine the handoff prompt below so another model can complete the project in one run.",
+      "should_trigger": true,
+      "reason": "Prompt refinement is the requested artifact."
+    },
+    {
+      "prompt": "Research the best current stack, then write a prompt for Claude Code to build the app.",
+      "should_trigger": true,
+      "reason": "Research plus prompt-writing request."
+    },
+    {
+      "prompt": "Audit this system prompt for missing acceptance tests and conflicting instructions.",
+      "should_trigger": true,
+      "reason": "Prompt audit request."
+    },
+    {
+      "prompt": "Turn this specification into an autonomous repository-build brief.",
+      "should_trigger": true,
+      "reason": "Autonomous build brief is a one-shot prompt artifact."
+    },
+    {
+      "prompt": "Build the app in this repository and test it.",
+      "should_trigger": false,
+      "reason": "The user wants implementation, not a prompt."
+    },
+    {
+      "prompt": "Research small modular reactors and tell me whether they are viable.",
+      "should_trigger": false,
+      "reason": "The user wants the research result, not a prompt for another agent."
+    },
+    {
+      "prompt": "Fix this TypeScript error.",
+      "should_trigger": false,
+      "reason": "Direct coding task."
+    },
+    {
+      "prompt": "Make an image of an underwater city.",
+      "should_trigger": false,
+      "reason": "Direct image-generation task."
+    },
+    {
+      "prompt": "How should I structure a good prompt?",
+      "should_trigger": false,
+      "reason": "General advice unless the user also asks for a finished prompt."
+    },
+    {
+      "prompt": "Give me three ideas for a strategy game.",
+      "should_trigger": false,
+      "reason": "Brainstorming, not one-shot prompt production."
+    },
+    {
+      "prompt": "Write a prompt that makes an AI summarize this article.",
+      "should_trigger": true,
+      "reason": "The requested artifact is a prompt, although the skill should keep the result compact."
+    },
+    {
+      "prompt": "Use the prompt below and do what it says.",
+      "should_trigger": false,
+      "reason": "The prompt is an input to execute, not an artifact to write or audit."
+    },
+    {
+      "prompt": "Make this one-shot less repetitive but keep every important requirement.",
+      "should_trigger": true,
+      "reason": "Explicit refinement of an established one-shot prompt."
+    }
+  ]
+}

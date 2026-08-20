@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated release artifacts
+dist/
+
+# Agent-local installations and sessions
+.opencode/skills/
+.opencode/session*/
+.claude/settings.local.json
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key

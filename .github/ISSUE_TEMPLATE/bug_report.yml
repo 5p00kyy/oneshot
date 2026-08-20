@@ -1,0 +1,52 @@
+name: Bug report
+description: Report incorrect activation, malformed output, validation failure, or packaging defect
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove secrets and private source material before submitting an example.
+  - type: input
+    id: version
+    attributes:
+      label: OneShot version or commit
+      placeholder: v1.0.0 or commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: Agent host
+      options:
+        - OpenCode
+        - Codex
+        - Claude Code
+        - GitHub Copilot CLI
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: Sanitized request or reproduction
+      description: Include enough context to reproduce the behavior without private data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Validation output
+      description: Include relevant validator, audit, or agent-host output.
