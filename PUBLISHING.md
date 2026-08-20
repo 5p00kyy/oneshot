@@ -92,12 +92,20 @@ gh release view vX.Y.Z
 gh skill preview 5p00kyy/oneshot oneshot@vX.Y.Z
 ```
 
-Download the public assets to a temporary directory and verify the published checksum before announcing the release.
-
-The pinned OpenCode installation command is:
+Download the public assets to a temporary directory and verify the published checksum before announcing the release. Verify the pinned skill in an isolated, host-neutral directory:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@vX.Y.Z --agent opencode --scope user
+verification_dir=$(mktemp -d)
+trap 'rm -rf "$verification_dir"' EXIT
+gh skill install 5p00kyy/oneshot oneshot@vX.Y.Z --dir "$verification_dir"
+python3 "$verification_dir/oneshot/scripts/validate_skill.py"
+```
+
+The pinned user installation command is:
+
+```bash
+AGENT_ID=universal  # Replace with the ID for the target host when needed.
+gh skill install 5p00kyy/oneshot oneshot@vX.Y.Z --agent "$AGENT_ID" --scope user
 ```
 
 ## Failure Recovery
@@ -110,6 +118,6 @@ gh skill install 5p00kyy/oneshot oneshot@vX.Y.Z --agent opencode --scope user
 ## Official References
 
 - Agent Skills specification: https://agentskills.io/specification
-- OpenCode Agent Skills: https://opencode.ai/docs/skills/
+- GitHub CLI `gh skill install`: https://cli.github.com/manual/gh_skill_install
 - GitHub CLI `gh skill publish`: https://cli.github.com/manual/gh_skill_publish
 - GitHub Actions security hardening: https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions

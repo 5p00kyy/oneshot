@@ -23,7 +23,7 @@ oneshot/
 ├── SKILL.md
 ├── README.md
 ├── agents/
-│   └── openai.yaml
+│   └── openai.yaml            # Optional host metadata for OpenAI-compatible interfaces
 ├── assets/
 │   ├── compact-oneshot-template.md
 │   ├── master-oneshot-template.md
@@ -45,45 +45,65 @@ oneshot/
     └── validate_skill.py
 ```
 
+The `agents/openai.yaml` file is optional host metadata used by OpenAI-compatible interfaces. It is not a runtime requirement, and its presence does not make OneShot OpenAI-dependent.
+
 ## Install with GitHub CLI
 
-From a published repository:
+Choose the agent ID for the host that should discover the skill, then install from the published repository:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot --agent opencode --scope user
+AGENT_ID=universal  # Or codex, claude-code, gemini-cli, opencode, openclaw, and others.
+gh skill install 5p00kyy/oneshot oneshot --agent "$AGENT_ID" --scope user
 ```
 
 Pin a reviewed release when reproducibility matters:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@v1.0.1 --agent opencode --scope user
+gh skill install 5p00kyy/oneshot oneshot@v1.1.0 --agent "$AGENT_ID" --scope user
 ```
 
 Preview first:
 
 ```bash
-gh skill preview 5p00kyy/oneshot oneshot@v1.0.1
+gh skill preview 5p00kyy/oneshot oneshot@v1.1.0
 ```
 
-The GitHub CLI skill commands are currently a preview feature. An unpinned install resolves the latest release, then the default branch when no release exists.
+See the [`gh skill install` manual](https://cli.github.com/manual/gh_skill_install) for the current host list and placement rules. The listed agent IDs are installation targets, not claims of full runtime testing on every host.
 
-## Manual OpenCode installation
+## Manual installation
 
-User scope:
+### Generic Agent Skills location
+
+Any Agent Skills-compatible host typically discovers skills from `~/.agents/skills/` (user scope) or `.agents/skills/` (project scope):
 
 ```bash
+mkdir -p ~/.agents/skills
+cp -R oneshot ~/.agents/skills/oneshot
+```
+
+### OpenCode
+
+```bash
+# User scope
 mkdir -p ~/.config/opencode/skills
 cp -R oneshot ~/.config/opencode/skills/oneshot
-```
 
-Project scope:
-
-```bash
+# Project scope
 mkdir -p .opencode/skills
 cp -R oneshot .opencode/skills/oneshot
 ```
 
-OpenCode also supports `.agents/skills/oneshot/` and `.claude/skills/oneshot/` compatibility locations.
+### Claude Code
+
+```bash
+# User scope
+mkdir -p ~/.claude/skills
+cp -R oneshot ~/.claude/skills/oneshot
+
+# Project scope
+mkdir -p .claude/skills
+cp -R oneshot .claude/skills/oneshot
+```
 
 ## Example requests
 
@@ -135,7 +155,7 @@ Use strict mode for a release gate:
 python3 scripts/audit_prompt.py path/to/prompt.md --strict
 ```
 
-The audit is intentionally mechanical. It catches common omissions, placeholders, repeated directives, exposed-chain-of-thought requests, and likely capability conflicts. It complements rather than replaces the semantic quality rubric.
+The audit is intentionally mechanical. It catches common omissions, placeholders, repeated directives, exposed-chain-of-thought requests, and likely capability conflicts. Sub-250-word prompts are treated as advisory notes rather than failures, so genuinely narrow prompts are not incorrectly penalized. The audit complements rather than replaces the semantic quality rubric.
 
 ## Evaluation
 

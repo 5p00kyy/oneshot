@@ -15,6 +15,23 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "skills" / "oneshot"
 SKILL_NAME = "oneshot"
 
+HOST_TARGETS: dict[str, tuple[str, str]] = {
+    "universal": (".agents/skills", ".agents/skills"),
+    "opencode": (".config/opencode/skills", ".opencode/skills"),
+    "claude-code": (".claude/skills", ".claude/skills"),
+    "gemini-cli": (".gemini/skills", ".gemini/skills"),
+    "openclaw": (".openclaw/skills", "skills"),
+}
+
+HOST_ALIASES: dict[str, str] = {
+    "claude": "claude-code",
+    "agents": "universal",
+}
+
+
+def canonical_target(target: str) -> str:
+    return HOST_ALIASES.get(target, target)
+
 
 def fail(message: str) -> None:
     print(f"ERROR: {message}", file=sys.stderr)
@@ -22,14 +39,12 @@ def fail(message: str) -> None:
 
 
 def default_destination(target: str, scope: str, project_root: Path) -> Path:
-    if target == "opencode":
-        base = Path.home() / ".config" / "opencode" / "skills" if scope == "user" else project_root / ".opencode" / "skills"
-    elif target == "agents":
-        base = Path.home() / ".agents" / "skills" if scope == "user" else project_root / ".agents" / "skills"
-    elif target == "claude":
-        base = Path.home() / ".claude" / "skills" if scope == "user" else project_root / ".claude" / "skills"
-    else:
+    target = canonical_target(target)
+    entry = HOST_TARGETS.get(target)
+    if entry is None:
         fail(f"Unsupported target: {target}")
+    user_rel, project_rel = entry
+    base = Path.home() / user_rel if scope == "user" else project_root / project_rel
     return base / SKILL_NAME
 
 
@@ -50,10 +65,27 @@ def validate_source() -> None:
         fail("Bundled skill failed validation; installation was not attempted")
 
 
+def reject_symlink_components(path: Path) -> None:
+    """Reject a destination if any lexical component is a symbolic link."""
+    candidate = path.expanduser()
+    if not candidate.is_absolute():
+        candidate = Path.cwd() / candidate
+
+    current = Path(candidate.anchor)
+    for part in candidate.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            fail(
+                f"Destination path contains a symbolic link at {current}; "
+                "the installer must not follow symlinks into unintended locations"
+            )
+
+
 def install(destination: Path, force: bool, dry_run: bool) -> None:
     if not SOURCE.is_dir():
         fail("Bundled skills/oneshot directory is missing")
 
+    reject_symlink_components(destination)
     destination = destination.expanduser().resolve()
     if destination == SOURCE.resolve() or SOURCE.resolve() in destination.parents:
         fail("Destination cannot be the bundled source directory or a child of it")
@@ -95,7 +127,12 @@ def install(destination: Path, force: bool, dry_run: bool) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", choices=("opencode", "agents", "claude"), default="opencode")
+    parser.add_argument(
+        "--target",
+        choices=sorted(set(HOST_TARGETS) | set(HOST_ALIASES)),
+        default="universal",
+        help="Agent host for default destination paths (default: universal)",
+    )
     parser.add_argument("--scope", choices=("user", "project"), default="user")
     parser.add_argument(
         "--project-root",

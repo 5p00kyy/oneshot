@@ -56,10 +56,10 @@ class RepositoryTests(unittest.TestCase):
             skill_file = skill / "SKILL.md"
             text = skill_file.read_text(encoding="utf-8")
             text = text.replace(
-                '  version: "1.0.1"\n  category: "prompt-authoring"',
-                "    version: 1.0.1\n"
+                '  version: "1.1.0"\n  category: "prompt-authoring"',
+                "    version: 1.1.0\n"
                 "    category: prompt-authoring\n"
-                "    github-ref: refs/tags/v1.0.1\n"
+                "    github-ref: refs/tags/v1.1.0\n"
                 "    github-repo: https://github.com/5p00kyy/oneshot",
             )
             skill_file.write_text(text, encoding="utf-8", newline="\n")
@@ -81,6 +81,16 @@ class RepositoryTests(unittest.TestCase):
             "--strict",
         )
         self.assertIn("No mechanical defects detected", result.stdout)
+
+    def test_prompt_audit_accepts_narrow_fixture_with_note(self) -> None:
+        result = self.run_command(
+            "skills/oneshot/scripts/audit_prompt.py",
+            "tests/fixtures/narrow-prompt.md",
+            "--strict",
+        )
+        self.assertIn("Mechanical score: 100/100", result.stdout)
+        self.assertIn("Prompt is under 250 words", result.stdout)
+        self.assertNotIn("WARNINGS", result.stdout)
 
     def test_prompt_audit_rejects_incomplete_fixture(self) -> None:
         result = self.run_command(
@@ -152,6 +162,65 @@ class RepositoryTests(unittest.TestCase):
                 with redirect_stderr(io.StringIO()):
                     with self.assertRaises(SystemExit):
                         packager.source_files()
+
+    def test_clean_rejects_dangerous_targets_without_deleting_them(self) -> None:
+        packager = self.load_packager()
+        dangerous = (
+            Path(ROOT.anchor),
+            ROOT.parent,
+            ROOT,
+            ROOT / "skills" / "oneshot",
+            ROOT / "skills" / "oneshot" / "assets",
+            Path.home(),
+        )
+        for target in dangerous:
+            with self.subTest(target=target):
+                with redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit):
+                        packager.validate_clean_target(target)
+
+        self.assertTrue((ROOT / "README.md").is_file())
+        self.assertTrue((ROOT / "skills" / "oneshot" / "SKILL.md").is_file())
+
+    def test_clean_rejects_symlink_and_unrelated_contents(self) -> None:
+        packager = self.load_packager()
+        with tempfile.TemporaryDirectory(prefix="oneshot-clean-safety-") as temp:
+            root = Path(temp)
+            outside = root / "outside"
+            outside.mkdir()
+            sentinel = outside / "keep.txt"
+            sentinel.write_text("keep", encoding="utf-8")
+            link = root / "linked-output"
+            link.symlink_to(outside, target_is_directory=True)
+
+            with redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    packager.clean_output(link)
+                with self.assertRaises(SystemExit):
+                    packager.clean_output(outside)
+
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "keep")
+            self.assertTrue(link.is_symlink())
+
+    def test_clean_allows_only_generated_release_output(self) -> None:
+        packager = self.load_packager()
+        with tempfile.TemporaryDirectory(prefix="oneshot-clean-generated-") as temp:
+            root = Path(temp)
+            output = root / "release-output"
+            output.mkdir()
+            (output / "oneshot-skill-v1.0.1.zip").write_bytes(b"archive")
+            (output / "oneshot-skill-v1.0.1.zip.sha256").write_text(
+                "digest  oneshot-skill-v1.0.1.zip\n", encoding="utf-8"
+            )
+            keep = root / "keep.txt"
+            keep.write_text("keep", encoding="utf-8")
+
+            cleaned = packager.clean_output(output)
+
+            self.assertEqual(cleaned, output.resolve())
+            self.assertFalse(output.exists())
+            self.assertEqual(keep.read_text(encoding="utf-8"), "keep")
+            self.assertEqual(packager.validate_clean_target(ROOT / "dist"), (ROOT / "dist").resolve())
 
     def test_finished_repository_excludes_bootstrap_artifacts(self) -> None:
         self.assertFalse((ROOT / "OPENCODE_HANDOFF.md").exists())
@@ -230,6 +299,65 @@ class RepositoryTests(unittest.TestCase):
                 "--force",
             )
             self.assertTrue((destination / "SKILL.md").is_file())
+
+    def test_installer_rejects_symlink_destination_component(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-install-symlink-") as temp:
+            root = Path(temp)
+            outside = root / "outside"
+            outside.mkdir()
+            link = root / "linked"
+            link.symlink_to(outside, target_is_directory=True)
+            result = subprocess.run(
+                [
+                    PYTHON,
+                    "scripts/install_skill.py",
+                    "--destination",
+                    str(link / "oneshot"),
+                    "--skip-validation",
+                    "--force",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("symbolic link", result.stderr)
+            self.assertFalse((outside / "oneshot").exists())
+
+    def test_installer_defaults_and_backward_compatible_aliases(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-install-targets-") as temp:
+            project = Path(temp)
+            cases = (
+                ((), project / ".agents" / "skills" / "oneshot"),
+                (("--target", "agents"), project / ".agents" / "skills" / "oneshot"),
+                (("--target", "claude"), project / ".claude" / "skills" / "oneshot"),
+                (("--target", "openclaw"), project / "skills" / "oneshot"),
+            )
+            for arguments, expected in cases:
+                with self.subTest(arguments=arguments):
+                    result = self.run_command(
+                        "scripts/install_skill.py",
+                        "--scope",
+                        "project",
+                        "--project-root",
+                        str(project),
+                        "--skip-validation",
+                        "--dry-run",
+                        *arguments,
+                    )
+                    self.assertIn(str(expected), result.stdout)
+
+    def test_repository_scripts_remain_executable(self) -> None:
+        executable_paths = (
+            ROOT / "scripts" / "install_skill.py",
+            ROOT / "scripts" / "package_release.py",
+            ROOT / "skills" / "oneshot" / "scripts" / "audit_prompt.py",
+            ROOT / "tests" / "test_repository.py",
+        )
+        for path in executable_paths:
+            with self.subTest(path=path):
+                self.assertNotEqual(path.stat().st_mode & 0o111, 0)
 
 
 if __name__ == "__main__":

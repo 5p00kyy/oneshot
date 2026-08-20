@@ -16,11 +16,11 @@ from pathlib import Path
 
 CATEGORY_PATTERNS: dict[str, tuple[str, ...]] = {
     "mission/outcome": (r"\bmission\b", r"\bgoal\b", r"\bobjective\b", r"definition of (?:done|finished)"),
-    "deliverables/output": (r"\bdeliverables?\b", r"output contract", r"final response", r"return exactly"),
+    "deliverables/output": (r"\bdeliverables?\b", r"output contract", r"final response", r"return exactly", r"##\s+output\b", r"final output"),
     "scope/constraints": (r"\bscope\b", r"constraints?", r"non-goals?", r"must not", r"do not"),
     "workflow/execution": (r"\bworkflow\b", r"implementation sequence", r"execution", r"phase 0", r"phase 1"),
-    "verification/acceptance": (r"acceptance tests?", r"verification", r"definition of done", r"quality gate"),
-    "priorities/fallbacks": (r"priority 0", r"priority order", r"cut first", r"fallback", r"failure handling"),
+    "verification/acceptance": (r"acceptance tests?", r"\bacceptance\b", r"verification", r"definition of done", r"quality gate"),
+    "priorities/fallbacks": (r"\bpriority\b", r"priority 0", r"priority order", r"cut first", r"fallback", r"failure handling"),
     "handoff": (r"handoff", r"verification actually performed", r"remaining limitations", r"how to run"),
 }
 
@@ -87,7 +87,7 @@ def main() -> int:
     notes: list[str] = []
 
     if len(words) < 250:
-        warnings.append("Prompt is under 250 words; verify that the task is genuinely narrow.")
+        notes.append("Prompt is under 250 words; verify that the task is genuinely narrow.")
     elif len(words) > 12_000:
         warnings.append("Prompt exceeds 12,000 words; perform an aggressive deduplication and salience review.")
 

@@ -150,9 +150,63 @@ def verify_archive(archive: Path) -> None:
         fail("Release ZIP is missing required files: " + ", ".join(missing))
 
 
-def clean_output(output_dir: Path) -> None:
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
+def reject_symlink_components(path: Path) -> None:
+    """Reject an output path if any lexical component is a symlink."""
+    candidate = path.expanduser()
+    if not candidate.is_absolute():
+        candidate = Path.cwd() / candidate
+
+    current = Path(candidate.anchor)
+    for part in candidate.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            fail(f"Refusing to clean through symbolic link: {current}")
+
+
+def validate_clean_target(target: Path) -> Path:
+    reject_symlink_components(target)
+    target = target.expanduser().resolve()
+    root_resolved = ROOT.resolve()
+    skill_resolved = SKILL_DIR.resolve()
+    dist_dir = root_resolved / "dist"
+
+    filesystem_root = Path(target.anchor).resolve()
+    if target == filesystem_root:
+        fail(f"Refusing to clean the filesystem root: {target}")
+    if target.parent == filesystem_root:
+        fail(f"Refusing to clean a top-level filesystem directory: {target}")
+
+    protected = {
+        "repository": root_resolved,
+        "current working directory": Path.cwd().resolve(),
+        "home directory": Path.home().resolve(),
+    }
+    for label, protected_path in protected.items():
+        if target == protected_path or target in protected_path.parents:
+            fail(f"Refusing to clean the {label} or an ancestor: {target}")
+
+    if target == skill_resolved or skill_resolved in target.parents:
+        fail(f"Refusing to clean the skill source tree: {target}")
+    if root_resolved in target.parents and target != dist_dir:
+        fail(f"Refusing to clean inside the repository: {target}")
+
+    if target.exists():
+        if not target.is_dir():
+            fail(f"Refusing to clean a non-directory output target: {target}")
+        generated_name = re.compile(
+            r"oneshot-skill-v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?\.zip(?:\.sha256)?"
+        )
+        for entry in target.iterdir():
+            if entry.is_symlink() or not entry.is_file() or not generated_name.fullmatch(entry.name):
+                fail(f"Refusing to clean output containing non-release entry: {entry}")
+    return target
+
+
+def clean_output(output_dir: Path) -> Path:
+    target = validate_clean_target(output_dir)
+    if target.exists():
+        shutil.rmtree(target)
+    return target
 
 
 def main() -> int:
@@ -170,9 +224,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    output_dir = args.output_dir.resolve()
+    output_dir = args.output_dir.expanduser()
     if args.clean:
-        clean_output(output_dir)
+        output_dir = clean_output(output_dir)
+    else:
+        output_dir = output_dir.resolve()
 
     archive, checksum = build_archive(output_dir)
     digest = checksum.read_text(encoding="utf-8").split()[0]

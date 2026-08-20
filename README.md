@@ -6,27 +6,39 @@ It is deliberately a prompt-authoring skill. It researches the task, calibrates 
 
 ## Install
 
-GitHub CLI v2.90.0 or later includes the preview `gh skill` commands.
+GitHub CLI v2.90.0 or later includes the `gh skill` commands.
 
-Install the latest release for OpenCode at user scope:
+Choose the GitHub CLI agent ID for the host that should discover the skill. `universal` uses the shared Agent Skills location:
 
-```bash
-gh skill install 5p00kyy/oneshot oneshot --agent opencode --scope user
-```
+| `AGENT_ID` | Host |
+|---|---|
+| `universal` | Shared Agent Skills location |
+| `codex` | Codex |
+| `claude-code` | Claude Code |
+| `gemini-cli` | Gemini CLI |
+| `opencode` | OpenCode |
+| `openclaw` | OpenClaw |
+
+GitHub CLI supports additional hosts. See the current list in the [`gh skill install` manual](https://cli.github.com/manual/gh_skill_install).
 
 Pin a reviewed release for reproducible installation:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@v1.0.1 --agent opencode --scope user
+AGENT_ID=universal  # Replace with the ID for your host when needed.
+gh skill install 5p00kyy/oneshot oneshot@v1.1.0 --agent "$AGENT_ID" --scope user
 ```
 
-Use `--scope project` to install only for the current project. Preview the pinned skill before installing it:
+Use `--scope project` to install only for the current project. Preview the pinned skill before installing:
 
 ```bash
-gh skill preview 5p00kyy/oneshot oneshot@v1.0.1
+gh skill preview 5p00kyy/oneshot oneshot@v1.1.0
 ```
 
 Agent Skills can contain executable scripts and behavioral instructions. Review the skill before installation and pin a release or commit when reproducibility matters.
+
+### Host compatibility
+
+OneShot uses the portable Agent Skills layout. The agent IDs above describe GitHub CLI installation targets, not a claim that every host has received full runtime testing. Validate host-specific discovery and behavior on the platform where the skill will run.
 
 ## Use
 
@@ -65,6 +77,7 @@ The portable package includes compact, standard, and master templates plus playb
 .
 ├── skills/oneshot/            # Portable Agent Skill
 │   ├── SKILL.md
+│   ├── agents/                # Optional host metadata (e.g., openai.yaml)
 │   ├── assets/
 │   ├── references/
 │   ├── scripts/
@@ -81,22 +94,22 @@ The repository layout is recognized by GitHub CLI skill discovery. Release archi
 Install from a checkout with GitHub CLI:
 
 ```bash
-gh skill install . oneshot --from-local --agent opencode --scope user
+gh skill install . oneshot --from-local --agent universal --scope user
 ```
 
 Or use the validated repository installer:
 
 ```bash
-./install.sh --target opencode --scope user
+./install.sh --target universal --scope user
 ```
 
 On Windows PowerShell:
 
 ```powershell
-.\install.ps1 --target opencode --scope user
+.\install.ps1 --target universal --scope user
 ```
 
-Existing installations are preserved unless `--force` is supplied. OpenCode also discovers Agent Skills from `.agents/skills/` and `.claude/skills/` compatibility locations.
+Existing installations are preserved unless `--force` is supplied. The custom installer keeps `claude` as an alias for `claude-code` and `agents` as an alias for `universal`; these aliases do not apply to GitHub CLI.
 
 ## Validate
 
