@@ -49,6 +49,31 @@ class RepositoryTests(unittest.TestCase):
         result = self.run_command("skills/oneshot/scripts/validate_skill.py")
         self.assertIn("OK: oneshot skill is valid", result.stdout)
 
+    def test_portable_validator_accepts_installer_metadata_indentation(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-installed-validation-") as temp:
+            skill = Path(temp) / "oneshot"
+            shutil.copytree(ROOT / "skills" / "oneshot", skill)
+            skill_file = skill / "SKILL.md"
+            text = skill_file.read_text(encoding="utf-8")
+            text = text.replace(
+                '  version: "1.0.1"\n  category: "prompt-authoring"',
+                "    version: 1.0.1\n"
+                "    category: prompt-authoring\n"
+                "    github-ref: refs/tags/v1.0.1\n"
+                "    github-repo: https://github.com/5p00kyy/oneshot",
+            )
+            skill_file.write_text(text, encoding="utf-8", newline="\n")
+
+            result = subprocess.run(
+                [PYTHON, str(skill / "scripts" / "validate_skill.py")],
+                cwd=skill,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertIn("OK: oneshot skill is valid", result.stdout)
+
     def test_prompt_audit_accepts_complete_fixture(self) -> None:
         result = self.run_command(
             "skills/oneshot/scripts/audit_prompt.py",

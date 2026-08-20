@@ -17,13 +17,13 @@ gh skill install 5p00kyy/oneshot oneshot --agent opencode --scope user
 Pin a reviewed release for reproducible installation:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@v1.0.0 --agent opencode --scope user
+gh skill install 5p00kyy/oneshot oneshot@v1.0.1 --agent opencode --scope user
 ```
 
 Use `--scope project` to install only for the current project. Preview the pinned skill before installing it:
 
 ```bash
-gh skill preview 5p00kyy/oneshot oneshot@v1.0.0
+gh skill preview 5p00kyy/oneshot oneshot@v1.0.1
 ```
 
 Agent Skills can contain executable scripts and behavioral instructions. Review the skill before installation and pin a release or commit when reproducibility matters.

@@ -4,7 +4,7 @@ description: Researches a complex request and writes or refines a single compreh
 license: MIT
 compatibility: Works with Agent Skills-compatible agents. Best results require web/search and file tools for research; when browsing is unavailable or disallowed, work from supplied context and clearly mark unverified assumptions.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   category: "prompt-authoring"
 ---
 

@@ -56,13 +56,13 @@ gh skill install 5p00kyy/oneshot oneshot --agent opencode --scope user
 Pin a reviewed release when reproducibility matters:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@v1.0.0 --agent opencode --scope user
+gh skill install 5p00kyy/oneshot oneshot@v1.0.1 --agent opencode --scope user
 ```
 
 Preview first:
 
 ```bash
-gh skill preview 5p00kyy/oneshot oneshot@v1.0.0
+gh skill preview 5p00kyy/oneshot oneshot@v1.0.1
 ```
 
 The GitHub CLI skill commands are currently a preview feature. An unpinned install resolves the latest release, then the default branch when no release exists.

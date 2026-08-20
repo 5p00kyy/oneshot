@@ -50,6 +50,7 @@ def parse_frontmatter(text: str) -> tuple[Frontmatter, str]:
     body = text[end + 5 :]
     values: Frontmatter = {}
     current_mapping: str | None = None
+    nested_indent: int | None = None
 
     for line_number, line in enumerate(raw.splitlines(), start=2):
         if "\t" in line:
@@ -57,11 +58,16 @@ def parse_frontmatter(text: str) -> tuple[Frontmatter, str]:
         if not line.strip() or line.lstrip().startswith("#"):
             continue
 
-        if line.startswith("  "):
+        indent = len(line) - len(line.lstrip(" "))
+        if indent:
             if current_mapping is None:
                 fail(f"Unexpected nested frontmatter line {line_number}: {line}")
-            nested_line = line[2:]
-            if nested_line.startswith(" ") or ":" not in nested_line:
+            if nested_indent is None:
+                nested_indent = indent
+            elif indent != nested_indent:
+                fail(f"Inconsistent nested frontmatter indentation (line {line_number})")
+            nested_line = line[indent:]
+            if ":" not in nested_line:
                 fail(f"Invalid nested frontmatter line {line_number}: {line}")
             key, value = nested_line.split(":", 1)
             key = key.strip()
@@ -92,9 +98,11 @@ def parse_frontmatter(text: str) -> tuple[Frontmatter, str]:
         if scalar:
             values[key] = scalar
             current_mapping = None
+            nested_indent = None
         else:
             values[key] = {}
             current_mapping = key
+            nested_indent = None
 
     return values, body
 

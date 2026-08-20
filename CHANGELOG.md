@@ -11,6 +11,16 @@ The project follows Semantic Versioning.
 - Run comparative skill evaluations across multiple agent hosts and publish the results.
 - Expand domain playbooks only when evaluation evidence shows a recurring coverage gap.
 
+## [1.0.1] - 2026-08-21
+
+### Fixed
+
+- Accept the nested metadata indentation GitHub CLI injects into installed skills.
+
+### Changed
+
+- Update pinned GitHub Actions to current Node 24-native releases.
+
 ## [1.0.0] - 2026-08-21
 
 ### Added
