@@ -11,6 +11,10 @@ The project follows Semantic Versioning.
 - Run comparative skill evaluations across multiple agent hosts and publish the results.
 - Expand domain playbooks only when evaluation evidence shows a recurring coverage gap.
 
+### Fixed
+
+- Publish each release's curated `CHANGELOG.md` section instead of GitHub's generic contributor rollup.
+
 ## [1.2.0] - 2026-08-22
 
 ### Added

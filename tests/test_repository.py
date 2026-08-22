@@ -40,6 +40,16 @@ class RepositoryTests(unittest.TestCase):
         spec.loader.exec_module(module)
         return module
 
+    def load_release_notes_extractor(self) -> ModuleType:
+        path = ROOT / "scripts" / "extract_release_notes.py"
+        spec = importlib.util.spec_from_file_location("oneshot_test_release_notes", path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader if spec else None)
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        spec.loader.exec_module(module)
+        return module
+
     def run_command(self, *parts: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
         result = subprocess.run(
             [PYTHON, *parts],
@@ -83,6 +93,22 @@ class RepositoryTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, msg=result.stderr)
             self.assertIn("OK: oneshot skill is valid", result.stdout)
+
+    def test_release_notes_use_the_curated_version_section(self) -> None:
+        extractor = self.load_release_notes_extractor()
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        notes = extractor.extract_release_notes(changelog, "v1.2.0")
+        self.assertIn("### Added", notes)
+        self.assertIn("Challenge Library layer", notes)
+        self.assertNotIn("New Contributors", notes)
+        self.assertNotIn("## [1.1.0]", notes)
+
+    def test_release_notes_reject_missing_or_empty_sections(self) -> None:
+        extractor = self.load_release_notes_extractor()
+        with self.assertRaisesRegex(ValueError, "found 0"):
+            extractor.extract_release_notes("## [1.0.0]\n\nUseful notes.\n", "v2.0.0")
+        with self.assertRaisesRegex(ValueError, "is empty"):
+            extractor.extract_release_notes("## [2.0.0]\n\n## [1.0.0]\nUseful notes.\n", "2.0.0")
 
     def test_public_hygiene_rejects_common_private_machine_paths(self) -> None:
         validator = self.load_repository_validator()
