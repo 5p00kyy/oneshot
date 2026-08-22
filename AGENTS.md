@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This repository maintains three layers around one contract — one initial brief, no human follow-up:
+This repository maintains three layers around one contract: one initial brief, no human follow-up:
 
 1. The portable Authoring skill: `skills/oneshot/`.
 2. The curated challenge Library: `library/` (versioned manifests, prompts, results).
 3. The static benchmark/gallery Lab: `site/` (data-driven from checked-in manifests).
 
-OneShot researches complex requests and authors detailed, implementation-ready one-shot prompts for another executor. It does not silently perform the requested underlying project unless the user explicitly asks for both execution and a reusable prompt.
+OneShot turns requests into proportionately scoped, standalone one-shot prompts for another executor. It researches only when material decisions require it, and does not silently perform the underlying project unless the user explicitly asks for both execution and a reusable prompt.
 
 ## Read before changing behavior
 

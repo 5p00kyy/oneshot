@@ -2,15 +2,15 @@
 
 The Library is the curated middle layer of OneShot: versioned challenge
 manifests, the standalone prompts they point to, and evidence-backed result
-manifests. It is plain JSON and Markdown under version control — no
+manifests. It is plain JSON and Markdown under version control, with no
 database, no service.
 
-- `schemas/` — versioned JSON Schemas for challenges and results.
-- `maintainers.json` — canonical maintainer IDs used only for review-attestation shape checks.
-- `challenges/<challenge-id>/` — one directory per challenge: the current
+- `schemas/`: versioned JSON Schemas for challenges and results.
+- `maintainers.json`: canonical maintainer IDs used only for review-attestation shape checks.
+- `challenges/<challenge-id>/`: one directory per challenge: the current
   `challenge.json` plus its prompt. Older versions needed by published results
   live under `versions/<semver>/` with their own manifest and prompt.
-- `results/<result-id>/` — one directory per published run result:
+- `results/<result-id>/`: one directory per published run result:
   `result.json` plus its evidence and artifact files. The checked-in records
   currently include two disputed showcase runs; see `results/README.md`.
 

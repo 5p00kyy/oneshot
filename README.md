@@ -1,10 +1,10 @@
 # OneShot
 
-OneShot is an evidence-backed field guide to one-shot autonomous work, built in three layers around one contract — **one initial brief, no human follow-up**:
+OneShot is an evidence-backed field guide to one-shot autonomous work, built in three layers around one contract: **one initial brief, no human follow-up**.
 
-1. **Authoring** — an Agent Skill that turns requests into proportionately scoped, self-contained prompts for another model or agent to execute.
-2. **Library** — a curated set of versioned challenge manifests and standalone prompts (`library/`), validated by dependency-free tooling.
-3. **Lab** — a static benchmark/gallery site (`site/`) that renders exactly what the checked-in manifests say: challenges today, evidence-backed results when they exist.
+1. **Authoring:** an Agent Skill that turns requests into proportionately scoped, self-contained prompts for another model or agent to execute.
+2. **Library:** a curated set of versioned challenge manifests and standalone prompts (`library/`), validated by dependency-free tooling.
+3. **Lab:** a static benchmark/gallery site (`site/`) that renders exactly what the checked-in manifests say: challenges today, evidence-backed results when they exist.
 
 It is deliberately a prompt-authoring skill. It calibrates scope, researches only when material decisions require it, checks the target executor where relevant, converts vague quality goals into observable requirements, defines proportionate verification, and produces a copy-ready handoff. It does not silently perform the underlying project when the user asked for a prompt.
 
@@ -93,11 +93,11 @@ Challenge licenses use a documented, deliberately small SPDX License List subset
 
 Current challenge candidates (all draft and closed to new runs):
 
-- [`loopback`](library/challenges/loopback/challenge.json) — circuit-rotation puzzle benchmark; naming review required.
-- [`neon-courier`](library/challenges/neon-courier/challenge.json) — top-down delivery/pursuit benchmark; rename required.
-- [`signal-siege`](library/challenges/signal-siege/challenge.json) — keyboard tower-defence benchmark; rename required.
-- [`gravshift`](library/challenges/gravshift/challenge.json) — gravity-flip platformer candidate requiring substantial originality revision.
-- [`windline`](library/challenges/windline/challenge.json) — compact glider candidate whose calibration did not pass activation.
+- [`loopback`](library/challenges/loopback/challenge.json): circuit-rotation puzzle benchmark; naming review required.
+- [`neon-courier`](library/challenges/neon-courier/challenge.json): top-down delivery/pursuit benchmark; rename required.
+- [`signal-siege`](library/challenges/signal-siege/challenge.json): keyboard tower-defence benchmark; rename required.
+- [`gravshift`](library/challenges/gravshift/challenge.json): gravity-flip platformer candidate requiring substantial originality revision.
+- [`windline`](library/challenges/windline/challenge.json): compact glider candidate whose calibration did not pass activation.
 
 ## Lab Site
 
