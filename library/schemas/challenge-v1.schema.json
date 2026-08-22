@@ -1,0 +1,451 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/5p00kyy/oneshot/library/schemas/challenge-v1.json",
+  "title": "OneShot challenge manifest",
+  "description": "Versioned manifest for a curated one-shot challenge. Validated by scripts/validate_library.py against a documented JSON Schema subset.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "version",
+    "title",
+    "family",
+    "category",
+    "status",
+    "origin",
+    "summary",
+    "prompt",
+    "benchmark_question",
+    "capability_dimensions",
+    "provenance",
+    "capabilities",
+    "execution_lane",
+    "budget",
+    "verification",
+    "artifacts",
+    "one_shot_policy"
+  ],
+  "properties": {
+    "schema": {
+      "const": "oneshot.challenge/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+      "description": "Stable slug; must equal the containing directory name."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Manifest semver; prompt content changes require a new version."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "category": {
+      "enum": [
+        "svg-illustration",
+        "playable-browser-game",
+        "browser-static-tool",
+        "static-web-prototype",
+        "repository-build",
+        "repository-repair",
+        "algorithmic-solution",
+        "data-transformation",
+        "text-analysis",
+        "edge-case-audit"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "retired"
+      ]
+    },
+    "origin": {
+      "enum": [
+        "original",
+        "external"
+      ],
+      "description": "original = authored in this repository; external = linked community classic."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 600
+    },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$",
+          "description": "Relative to this manifest's directory; must stay inside library/."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "evaluator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "runtime",
+        "notes"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$",
+          "description": "Public evaluator entrypoint relative to this manifest's directory. Hidden variants, when used, remain outside contestant prompts."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "runtime": {
+          "enum": [
+            "node22-chromium"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 500
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "license",
+        "attribution"
+      ],
+      "properties": {
+        "source_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "source_published": {
+          "type": "string",
+          "format": "date"
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "label"
+          ],
+          "properties": {
+            "spdx": {
+              "enum": [
+                "AGPL-3.0-only",
+                "Apache-2.0",
+                "BSD-2-Clause",
+                "BSD-3-Clause",
+                "CC0-1.0",
+                "GPL-2.0-only",
+                "GPL-3.0-only",
+                "ISC",
+                "LGPL-2.1-only",
+                "LGPL-3.0-only",
+                "MIT",
+                "MPL-2.0",
+                "Unlicense",
+                null
+              ],
+              "description": "Reviewed SPDX License List subset; null means no declared license."
+            },
+            "label": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "attribution": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 1000
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "skills"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 300
+        },
+        "tools": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "skills": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "execution_lane": {
+      "enum": [
+        "browser-static-single-file",
+        "browser-static-bundle",
+        "image-static",
+        "text-response",
+        "repository-build"
+      ],
+      "description": "How artifacts are produced and how the Lab may display them later."
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "notes"
+      ],
+      "properties": {
+        "wall_clock_minutes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 10080
+        },
+        "output_files_max": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 500
+        },
+        "network_access": {
+          "enum": [
+            "none",
+            "docs-only",
+            "full"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "method",
+          "description",
+          "evidence_required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "method": {
+            "enum": [
+              "automated-script",
+              "manual-browser",
+              "visual-review",
+              "interactive-check"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "evidence_required": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "enum": [
+                "transcript",
+                "log",
+                "screenshot",
+                "checksum-file",
+                "reproduction-script",
+                "external-link"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "kind",
+          "required",
+          "description"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$",
+            "description": "Expected artifact path relative to a result directory."
+          },
+          "kind": {
+            "enum": [
+              "html",
+              "svg",
+              "png",
+              "markdown",
+              "log"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "one_shot_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "human_follow_up",
+        "internal_iteration",
+        "notes"
+      ],
+      "properties": {
+        "human_follow_up": {
+          "const": false
+        },
+        "internal_iteration": {
+          "const": true
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "family": {
+      "enum": [
+        "playable",
+        "build",
+        "precision",
+        "repair",
+        "edge-case"
+      ],
+      "description": "Primary benchmark family; category remains the artifact or task subtype."
+    },
+    "tier": {
+      "enum": [
+        "atom",
+        "compact",
+        "bounded",
+        "showcase"
+      ],
+      "description": "Complexity board: atom (T0), compact (T1), bounded workflow (T2), or showcase/stress (T3). Only T0-T2 belong on the cross-model core board."
+    },
+    "prompt_profile": {
+      "enum": [
+        "brief",
+        "benchmark",
+        "extensive"
+      ],
+      "description": "Authoring-depth profile used to prevent compact tasks inheriting repository-scale prompt structure."
+    },
+    "benchmark_question": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 500,
+      "description": "Concrete capability question this brief is designed to test."
+    },
+    "capability_dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "enum": [
+          "planning",
+          "implementation",
+          "interaction-design",
+          "state-management",
+          "algorithmic-reasoning",
+          "visual-judgment",
+          "precision",
+          "debugging",
+          "verification",
+          "accessibility",
+          "offline-delivery"
+        ]
+      },
+      "description": "Standardized capabilities assessed by the challenge."
+    }
+  }
+}

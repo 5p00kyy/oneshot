@@ -1,0 +1,50 @@
+OneShot independent validation: Qwen3.8 27B Gravshift
+Executed: 2026-08-21
+
+Prompt integrity
+prompt_bytes=3404
+prompt_sha256=481dd6b7f94d87fb1131c2fe2317b9dd27a9aab99cf170ba2a191032728d7c46
+prompt_matches_challenge=true
+human_follow_up_messages=0
+
+Run identity and terminal state
+providerID=vllm
+modelID=qwen3.8-27b-nvfp4
+configured_context_tokens=122880
+configured_output_tokens=81920
+opencode_effective_generation_cap_tokens=32000
+agent=build
+opencode_version=1.18.18
+process_exit_code=0
+runtime_ms=661018
+structured_event_count=2
+step_start_events=1
+step_finish_events=1
+terminal_step_reason=length
+terminal_step_output_tokens=32000
+tool_events=0
+model_text_handoff_events=0
+
+Output inspection
+work_directory_present=true
+opencode_git_metadata_present=true
+model_authored_output_files=0
+required_index_html_present=false
+required_readme_md_present=false
+challenge_output_file_limit=2
+
+Independent browser check
+attempted_url=file://<run-root>/gravshift/work/index.html
+result=ERR_FILE_NOT_FOUND
+screenshot=evidence/no-artifact.png
+
+Criterion determination
+offline-boot=FAIL: no index.html exists to boot.
+gravity-platform-loop=FAIL: no playable artifact exists.
+deterministic-rooms=FAIL: no rooms, snapshot function, or runtime state exists to inspect.
+visual-readability=FAIL: no rendered game view exists.
+
+Overall criterion result: 0/4 FAIL.
+
+Interpretation
+The process exit code was zero, but that only means the OpenCode command ended normally. The preserved event stream shows the sole model step ended for reason "length" at 32,000 output tokens without a tool call or final handoff. The isolated work directory therefore contains no challenge deliverables. Output isolation was functioning correctly; absence of files is the observed model-run result, not a path-resolution error.

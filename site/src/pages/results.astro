@@ -1,0 +1,88 @@
+---
+import Base from "../layouts/base.astro";
+import { loadResults, withBase } from "../lib/library";
+
+const results = loadResults();
+const verified = results.filter((result) => result.status === "verified").length;
+const disputed = results.filter((result) => result.status === "disputed").length;
+---
+
+<Base
+  title="Results"
+  description="Published one-shot runs with artifacts, hashes, executor identity, review evidence, and reproducibility notes."
+  active="results"
+>
+  <section class="hero hero-page">
+    <div class="container">
+      <p class="hero-overline">Lab {results.length} published run{results.length === 1 ? "" : "s"}</p>
+      <div class="hero-grid">
+        <div class="hero-statement"><h1>Published runs.</h1></div>
+        <p class="lede">
+          Not a leaderboard. A public ledger of what was asked, what ran, what
+          survived verification, and what did not.
+        </p>
+      </div>
+      <dl class="hero-register compact" aria-label="Result register summary">
+        <div><dt>Published</dt><dd>{String(results.length).padStart(2, "0")}</dd></div>
+        <div><dt>Verified</dt><dd>{String(verified).padStart(2, "0")}</dd></div>
+        <div><dt>Disputed</dt><dd>{String(disputed).padStart(2, "0")}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Published runs">
+    <div class="container">
+      {
+        results.length === 0 ? (
+          <div class="empty-state">
+            <span class="empty-count" aria-hidden="true">[ 0 / 0 ]</span>
+            <h2>No published runs yet</h2>
+            <p>
+              No attempt has arrived with enough evidence to publish. Placeholder
+              runs, sampled outputs, and decorative scores do not count.
+            </p>
+            <p><a href={withBase("/contribute/")}>Submit a complete run</a> · <a href={withBase("/methodology/")}>Read the judging protocol</a></p>
+          </div>
+        ) : (
+          <ol class="result-list">
+            {results.map((result, index) => (
+              <li class="result-card">
+                <a class="result-card-preview" href={withBase(`/results/${result.id}/`)} aria-label={`Open ${result.id}`}>
+                  {result.preview_data_url ? <img src={result.preview_data_url} alt={result.preview_alt} /> : <span>No visual artifact</span>}
+                </a>
+                <div class="result-card-body">
+                  <div class="result-card-topline">
+                    <span>{String(index + 1).padStart(2, "0")} / {String(results.length).padStart(2, "0")}</span>
+                    <span class="status-mark" class:list={{ verified: result.status === "verified" }}>{result.status}</span>
+                  </div>
+                  <p class="result-challenge"><a href={withBase(`/challenges/${result.challenge_id}/`)}>{result.challenge_id}</a> / v{result.challenge_version}</p>
+                  <h2><a href={withBase(`/results/${result.id}/`)}>{result.model_name}</a></h2>
+                  <p class="result-claim">{result.claim_summary}</p>
+                  <dl class="result-facts">
+                    <div><dt>Agent</dt><dd>{result.agent_name} {result.agent_version}</dd></div>
+                    <div><dt>Criteria</dt><dd>{result.criteria_passed} / {result.criteria_total} passed</dd></div>
+                    <div><dt>Evidence</dt><dd>{result.evidence_count} checked files</dd></div>
+                    <div><dt>Reproducibility</dt><dd>{result.reproducibility_status}</dd></div>
+                    <div><dt>Executed</dt><dd>{result.executed_at}</dd></div>
+                  </dl>
+                  <a class="record-link" href={withBase(`/results/${result.id}/`)}>Inspect the full record <span>→</span></a>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section section-note" aria-labelledby="classes-heading">
+    <div class="container editorial-grid">
+      <div class="section-heading"><span class="number" aria-hidden="true">§</span><h2 id="classes-heading">What the labels mean</h2></div>
+      <div class="prose">
+        <p><strong>Verified</strong> means a listed maintainer reviewed the preserved evidence and reproduced the applicable checks. It does not mean the artifact is perfect.</p>
+        <p><strong>Disputed</strong> means independent review contradicted a material claim. The artifact and evidence stay public so the failure remains inspectable.</p>
+        <p><strong>Canonical</strong> identifies a maintainer-run reference attempt, not a passing result. Community and showcase runs face the same evidence contract.</p>
+      </div>
+    </div>
+  </section>
+</Base>

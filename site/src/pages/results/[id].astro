@@ -1,0 +1,110 @@
+---
+import Base from "../../layouts/base.astro";
+import PlayableArtifact from "../../components/PlayableArtifact.astro";
+import { loadResults, withBase } from "../../lib/library";
+
+export function getStaticPaths() {
+  return loadResults().map((result) => ({ params: { id: result.id }, props: { result } }));
+}
+
+const { result } = Astro.props;
+---
+
+<Base
+  title={`${result.model_name} on ${result.challenge_id}`}
+  description={result.claim_summary}
+  active="results"
+>
+  <article>
+    <header class="detail-header result-detail-header">
+      <div class="container">
+        <p class="breadcrumb"><a href={withBase("/results/")}>Results</a><span aria-hidden="true"> / </span><span>{result.id}</span></p>
+        <div class="detail-register" aria-hidden="true">
+          <span>{result.status}</span><span>{result.run_class} attempt</span><span>{result.run_lane}</span><span>{result.executed_at}</span>
+        </div>
+        <p class="kicker">{result.challenge_id} · v{result.challenge_version}</p>
+        <h1>{result.model_name}</h1>
+        <p class="summary">{result.claim_summary}</p>
+      </div>
+    </header>
+
+    <section class="section result-record" aria-label="Run record">
+      <div class="container result-record-grid">
+        <div class="result-artifact-panel">
+          <div class="result-artifact-bar"><span>{result.interactive_document_base64 ? "Interactive artifact" : "Artifact preview"}</span><span>{result.status}</span></div>
+          {result.interactive_document_base64 ? (
+            <PlayableArtifact
+              documentBase64={result.interactive_document_base64}
+              title={`${result.model_name} on ${result.challenge_id}`}
+              posterDataUrl={result.preview_data_url}
+              posterAlt={result.preview_alt}
+            />
+          ) : result.preview_data_url ? (
+            <img src={result.preview_data_url} alt={result.preview_alt} />
+          ) : (
+            <p>No visual preview is available for this result.</p>
+          )}
+        </div>
+        <aside class="result-ledger" aria-label="Identity and evidence summary">
+          <p class="label">Executor identity</p>
+          <dl>
+            <div><dt>Model</dt><dd>{result.model_name} {result.model_version}</dd></div>
+            <div><dt>Snapshot</dt><dd class="hash">{result.model_snapshot}</dd></div>
+            <div><dt>Agent</dt><dd>{result.agent_name} {result.agent_version} / {result.agent_profile}</dd></div>
+            <div><dt>Criteria</dt><dd>{result.criteria_passed} of {result.criteria_total} passed</dd></div>
+            <div><dt>Evidence</dt><dd>{result.evidence_count} checked files</dd></div>
+            <div><dt>Reproduction</dt><dd>{result.reproducibility_status}</dd></div>
+            <div><dt>Wall clock</dt><dd>{result.wall_clock_minutes == null ? "undeclared" : `${result.wall_clock_minutes} min`}</dd></div>
+          </dl>
+          <a class="record-link" href={result.repository_url}>Browse raw record on GitHub ↗</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="artifacts-heading">
+      <div class="container editorial-grid">
+        <div class="section-heading"><span class="number" aria-hidden="true">01</span><h2 id="artifacts-heading">Artifact hashes</h2></div>
+        <div class="artifact-list">
+          {result.artifacts.length === 0 ? (
+            <p>No challenge artifact was produced in this attempt. The retained evidence documents the terminal state.</p>
+          ) : result.artifacts.map((artifact) => (
+            <div class="artifact-row">
+              <span>
+                <strong>{artifact.path}</strong>
+                <small>{artifact.kind} · <a href={artifact.download_url}>Download raw artifact ↗</a></small>
+              </span>
+              <code>{artifact.sha256}</code>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="criteria-heading">
+      <div class="container editorial-grid">
+        <div class="section-heading"><span class="number" aria-hidden="true">02</span><h2 id="criteria-heading">Criterion outcomes</h2></div>
+        <div class="criterion-list">
+          {result.criterion_outcomes.map((outcome) => (
+            <article class="criterion-row">
+              <div class="criterion-name">
+                <span class="criterion-state" class:list={{ passed: outcome.passed }}>{outcome.passed ? "Pass" : "Fail"}</span>
+                <h3>{outcome.id}</h3>
+              </div>
+              <p>{outcome.notes}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-note" aria-labelledby="review-heading">
+      <div class="container editorial-grid">
+        <div class="section-heading"><span class="number" aria-hidden="true">03</span><h2 id="review-heading">{result.status === "disputed" ? "Dispute finding" : "Maintainer review"}</h2></div>
+        <div class="prose">
+          <p>{result.review_notes ?? (result.status === "disputed" ? "The central success claim did not survive independent validation. The preserved record shows which checks still passed and where progression failed." : "No maintainer review is attached to this record.")}</p>
+          <p><a href={withBase(`/challenges/${result.challenge_id}/`)}>Read the frozen challenge brief →</a></p>
+        </div>
+      </div>
+    </section>
+  </article>
+</Base>

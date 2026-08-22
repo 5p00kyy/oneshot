@@ -2,7 +2,11 @@
 
 ## Purpose
 
-This repository publishes one portable Agent Skill: `skills/oneshot/`.
+This repository maintains three layers around one contract — one initial brief, no human follow-up:
+
+1. The portable Authoring skill: `skills/oneshot/`.
+2. The curated challenge Library: `library/` (versioned manifests, prompts, results).
+3. The static benchmark/gallery Lab: `site/` (data-driven from checked-in manifests).
 
 OneShot researches complex requests and authors detailed, implementation-ready one-shot prompts for another executor. It does not silently perform the requested underlying project unless the user explicitly asks for both execution and a reusable prompt.
 
@@ -16,6 +20,13 @@ For changes to skill behavior, read:
 - `skills/oneshot/references/quality-rubric.md`
 - `skills/oneshot/references/anti-patterns.md`
 - Relevant domain sections in `skills/oneshot/references/domain-playbooks.md`
+
+For changes to the challenge library or site, read:
+
+- `docs/one-shot-definition.md`
+- `library/README.md`
+- `library/schemas/challenge-v1.schema.json` and `library/schemas/result-v1.schema.json`
+- `CONTRIBUTING.md` sections on challenges, results, and the site
 
 For publishing work, read:
 
@@ -33,8 +44,11 @@ For publishing work, read:
 - Keep both positive and negative trigger evaluations.
 - Do not request exposed chain of thought.
 - Do not fabricate research, citations, executor capabilities, test results, or completion evidence.
+- Challenge and result manifests must pass `scripts/validate_library.py`; result claims require evidence; external entries are linked, never copied.
+- The site renders only what checked-in manifests support; no placeholder cards, fake metrics, or fabricated runs; submitted artifacts are untrusted and never auto-executed.
+- Keep the site base path `/oneshot/` working in production and dev.
 - Keep validation and packaging scripts dependency-free unless there is a compelling documented reason.
-- Do not commit generated `dist/` artifacts.
+- Do not commit generated `dist/` artifacts (root or `site/dist`) or `site/node_modules`.
 - Do not commit caches, credentials, editor state, or installation metadata injected by a skill manager.
 - Do not publish or create external repositories unless the user explicitly authorizes that action.
 
@@ -46,6 +60,12 @@ Run after any meaningful change:
 python3 scripts/validate_repo.py
 python3 -m unittest discover -s tests -p "test_*.py"
 python3 scripts/package_release.py
+```
+
+After changes to `site/` or `library/`, also run:
+
+```bash
+cd site && npm ci && npm run build && npm run verify:dist
 ```
 
 When GitHub CLI skill support is available, also run:

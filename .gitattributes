@@ -4,3 +4,6 @@
 *.jpeg binary
 *.webp binary
 *.zip binary
+
+# Published evidence artifacts are byte-addressed and may preserve generator formatting.
+library/results/**/index.html -whitespace

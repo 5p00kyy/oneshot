@@ -1,0 +1,425 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/5p00kyy/oneshot/library/schemas/result-v2.json",
+  "title": "OneShot run result manifest",
+  "description": "Versioned manifest for a published one-shot run result with evidence. Validated by scripts/validate_library.py against a documented JSON Schema subset.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "challenge",
+    "run_class",
+    "run_lane",
+    "executed_at",
+    "executor",
+    "status",
+    "claim",
+    "criterion_outcomes",
+    "artifacts",
+    "evidence",
+    "reproducibility",
+    "prompt_echo"
+  ],
+  "properties": {
+    "schema": {
+      "const": "oneshot.result/v2"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+      "description": "Stable result slug; must equal the containing directory name."
+    },
+    "challenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    "run_class": {
+      "enum": [
+        "canonical",
+        "community",
+        "showcase"
+      ],
+      "description": "canonical = maintainer-run reference; community = public submission; showcase = editorially highlighted community or canonical run."
+    },
+    "run_lane": {
+      "enum": [
+        "raw-completion",
+        "agentic-self-review"
+      ],
+      "description": "Comparison lane. Raw completion forbids tool-mediated inspection and repair; agentic self-review permits declared tools inside the same no-follow-up run."
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "agent",
+        "host"
+      ],
+      "properties": {
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 120
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "snapshot_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 160
+            }
+          }
+        },
+        "agent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "profile": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 200
+            }
+          }
+        },
+        "host": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            }
+          }
+        },
+        "identity_notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "unverified",
+        "verified",
+        "disputed",
+        "withdrawn"
+      ],
+      "description": "unverified = claim not yet independently checked; verified = reproduced or evidence-reviewed by a maintainer."
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "summary"
+      ],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 1000
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$",
+            "description": "Relative to this result's directory; must exist, stay inside library/, and use the extension required by kind."
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "kind": {
+            "enum": [
+              "html",
+              "svg",
+              "png",
+              "markdown",
+              "log"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "location",
+          "sha256",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+          },
+          "kind": {
+            "enum": [
+              "transcript",
+              "log",
+              "screenshot",
+              "checksum-file",
+              "reproduction-script",
+              "external-link"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 400,
+            "description": "Safe local path whose extension/content matches kind; only external-link may use an HTTPS URL."
+          },
+          "sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 of checked-in evidence bytes. Must be null only for external-link evidence."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "criterion_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "passed",
+          "evidence_refs",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "instructions_path",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "reproducible",
+            "partially-reproducible",
+            "not-reproducible",
+            "untested"
+          ]
+        },
+        "instructions_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$",
+          "description": "Safe relative path to reproduction instructions, if any."
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "budget_actual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "notes"
+      ],
+      "properties": {
+        "wall_clock_minutes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10080
+        },
+        "output_files": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 500
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "prompt_echo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Must equal the referenced challenge's current prompt hash."
+        }
+      }
+    },
+    "maintainer_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "reviewed_at",
+        "decision",
+        "notes"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date"
+        },
+        "decision": {
+          "const": "verified"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loopback</title>
+<style>
+  :root{
+    --paper:#F4F1EA;
+    --ink:#1A1917;
+    --accent:#C24D2C;
+    --line:#D8D2C5;
+    --muted:#6E685D;
+    --paper-deep:#ECE7DC;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:24px 20px 60px}
+  .num{font-variant-numeric:tabular-nums}
+  .hidden{display:none!important}
+
+  #screen-start{text-align:center;padding-top:8vh}
+  .title{font-size:72px;line-height:.82;font-weight:800;letter-spacing:-0.04em;margin:0 0 6px}
+  .tagline{color:var(--muted);margin:14px 0 34px;font-size:1.05rem}
+  .btn{
+    font:inherit;font-size:1rem;cursor:pointer;
+    background:transparent;color:var(--ink);
+    border:2px solid var(--ink);border-radius:6px;
+    padding:12px 26px;font-weight:600;letter-spacing:.01em;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper)}
+  .btn:focus-visible,.level:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .btn.primary{background:var(--ink);color:var(--paper)}
+  .btn.primary:hover{background:var(--accent);border-color:var(--accent)}
+  .btn.ghost{border-color:var(--line);background:transparent;color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--ink)}
+
+  .levelgrid{display:grid;grid-template-columns:repeat(6,52px);gap:8px;justify-content:center;margin:0 auto}
+  .level{
+    height:52px;border-radius:6px;border:2px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;font-size:.72rem;line-height:1;position:relative;background:transparent;color:var(--ink);
+  }
+  .level .n{font-weight:700;font-size:.95rem}
+  .level .b{color:var(--muted);margin-top:2px}
+  .level.locked{cursor:not-allowed;color:var(--muted);opacity:.55}
+  .level.beat{border-color:var(--accent)}
+  .level:hover:not(.locked){border-color:var(--ink)}
+  .hint{color:var(--muted);font-size:.85rem;margin-top:26px;line-height:1.5}
+  kbd{font:inherit;font-weight:600;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--paper-deep)}
+
+  .ghead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:6px 0 4px}
+  .ghead .lv{font-weight:700;font-size:1.3rem;letter-spacing:-.02em}
+  .stat{color:var(--muted);font-size:.82rem}
+  .stat b{color:var(--ink);font-weight:700;font-size:.95rem}
+  .gright{margin-left:auto;display:flex;gap:8px}
+  .iconbtn{
+    font:inherit;font-size:.8rem;cursor:pointer;border:2px solid var(--line);
+    background:transparent;color:var(--ink);border-radius:6px;padding:7px 14px;font-weight:600;
+  }
+  .iconbtn:hover{border-color:var(--ink)}
+  .iconbtn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .iconbtn:disabled{opacity:.4;cursor:not-allowed}
+
+  .board-box{margin:18px auto 6px;width:fit-content;background:var(--paper-deep);border:1px solid var(--line);border-radius:10px;padding:10px}
+  svg.board{display:block}
+  .tile{transform-box:fill-box;transform-origin:center;transition:transform .16s cubic-bezier(.2,.8,.3,1)}
+  rect.cellbg{fill:var(--paper);stroke:var(--line);stroke-width:1}
+  .conn{stroke:var(--ink);stroke-width:7;stroke-linecap:round;fill:none}
+  .pin{fill:var(--ink);stroke:none}
+  .tile.powered .conn,.tile.powered .pin{stroke:var(--accent);fill:var(--accent)}
+  .source .pin{fill:none}
+  .source .core{fill:var(--accent);stroke:var(--accent);stroke-width:0}
+  .tile.powered.source .core{fill:var(--accent)}
+  .lamp .bulb{fill:none;stroke:var(--ink);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+  .lamp .tick{stroke:none;fill:none}
+  .tile.lit .bulb{fill:var(--accent);stroke:var(--accent)}
+  .tile.lit .tick{stroke:var(--paper);stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .focbox{stroke:var(--ink);stroke-width:3;fill:none;pointer-events:none}
+  .sub{margin-top:8px;color:var(--muted);font-size:.82rem;text-align:center}
+
+  .overlay{position:fixed;inset:0;background:rgba(26,25,23,.5);display:flex;align-items:center;justify-content:center;z-index:20}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:30px 34px;max-width:440px;width:calc(100% - 40px);text-align:center;box-shadow:0 1px 0 0 rgba(0,0,0,.06)}
+  .panel h2{margin:0 0 6px;font-size:1.6rem;letter-spacing:-.02em}
+  .panel .sub2{color:var(--muted);margin:0 0 18px}
+  .scoreline{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0;margin:0 0 6px;font-size:.95rem}
+  .scoreline .lbl{color:var(--muted)}
+  .scoreline .val{font-weight:600;font-variant-numeric:tabular-nums}
+  .win-actions{display:flex;gap:10px;justify-content:center;margin-top:6px}
+  .menu-grid{display:grid;grid-template-columns:repeat(4,60px);gap:10px;justify-content:center;margin:18px auto 22px}
+  .menu-grid .level{height:60px;font-size:.78rem}
+  .howto{text-align:left;color:var(--ink);font-size:.9rem;line-height:1.6;margin-top:6px}
+  .howto h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 4px;color:var(--muted)}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+  @media (max-width:560px){ .title{font-size:54px} .levelgrid{grid-template-columns:repeat(4,52px)} .wrap{padding:16px 12px 40px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="screen-start">
+    <h1 class="title">Loopback</h1>
+    <p class="tagline">Rotate the wires. Power every lamp.</p>
+    <p><button class="btn primary" id="btn-play">Play Level 1</button></p>
+    <p style="margin-top:22px"><button class="btn ghost" id="btn-select-start">Choose Level</button></p>
+    <p class="hint">Click or tap a tile to rotate it.<br>
+      Keyboard: <kbd>←↑→↓</kbd> move · <kbd>Enter</kbd>/<kbd>Space</kbd> rotate ·
+      <kbd>U</kbd> undo · <kbd>R</kbd> reset · <kbd>Esc</kbd> menu.</p>
+  </div>
+
+  <div id="screen-game" class="hidden">
+    <div class="ghead">
+      <div><span class="lv" id="g-level">Level 1</span> <span class="stat" id="g-par"></span></div>
+      <span class="stat"><b class="num" id="g-moves">0</b> moves</span>
+      <span class="stat">best <b class="num" id="g-best">—</b></span>
+      <span class="stat" id="g-lamps" style="display:none"></span>
+      <div class="gright">
+        <button class="iconbtn" id="btn-menu">Menu</button>
+        <button class="iconbtn" id="btn-reset">Reset</button>
+        <button class="iconbtn" id="btn-undo">Undo</button>
+      </div>
+    </div>
+    <div class="board-box"><svg class="board" id="board" role="img" aria-label="Level board"></svg></div>
+    <p class="sub" id="sub-hint">Click or tap a tile to rotate it clockwise.</p>
+
+    <div id="screen-win" class="overlay hidden">
+      <div class="panel" role="dialog" aria-modal="true" aria-labelledby="win-title">
+        <h2 id="win-title">Level complete</h2>
+        <p class="sub2" id="win-sub"></p>
+        <div class="scoreline"><span class="lbl">Moves</span><span class="val num" id="win-moves"></span></div>
+        <div class="scoreline"><span class="lbl">Par</span><span class="val num" id="win-par"></span></div>
+        <div class="scoreline"><span class="lbl">Personal best</span><span class="val num" id="win-best"></span></div>
+        <div class="win-actions">
+          <button class="btn" id="win-replay">Replay</button>
+          <button class="btn primary" id="win-next">Next level</button>
+        </div>
+        <p style="margin:16px 0 0"><button class="btn ghost" id="win-menu">Level select</button></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-menu" class="overlay hidden">
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="menu-title" style="max-width:520px">
+      <h2 id="menu-title">Level select</h2>
+      <div id="menu-grid" class="menu-grid"></div>
+      <button class="btn" id="menu-close">Close</button>
+      <div class="howto">
+        <h3>How to play</h3>
+        <p>Rotate the wire tiles to join the <b style="color:var(--accent)">power source</b> to every
+        <b>lamp</b> at the same time. A wire carries power only where its connectors face its neighbors.
+        Dead ends and loops are fine — every lamp just has to be lit.</p>
+        <h3>Controls</h3>
+        <p>Click / tap a tile to rotate it. Keyboard: <kbd>←↑→↓</kbd> move cursor,
+        <kbd>Enter</kbd>/<kbd>Space</kbd> rotate, <kbd>U</kbd> undo, <kbd>R</kbd> reset,
+        <kbd>Esc</kbd> open/close this menu.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sr-only" id="live" aria-live="polite"></div>
+</div>
+
+<script>
+/* =============== LEVEL DATA (embedded; solution orientations in source comment) =============== */
+/*
+ * LEVEL DATA + SOLUTION ORIENTATIONS (verified by build/build_levels.py)
+ *
+ * L01  5x5  par 2  lamps 1  decoys 0
+ *    d a h e c
+ *    i . . . g
+ *    f . . . b
+ *    . . . . .
+ *    . . . . .
+ *    legend: a=straight(EW) b=source(N) c=elbow(SW) d=elbow(ES) e=straight(NS) f=lamp(N) g=straight(EW) h=straight(EW) i=straight(NS)
+ *    solution: a→EW  b→N  c→SW  d→ES  e→EW  f→N  g→NS  h→EW  i→NS
+ * 
+ * L02  5x5  par 3  lamps 1  decoys 1
+ *    . a j h c
+ *    . g . . i
+ *    . d . . b
+ *    . f . . e
+ *    . . . k .
+ *    legend: a=elbow(NE) b=straight(NS) c=elbow(SW) d=straight(EW) e=source(N) f=lamp(N) g=straight(NS) h=straight(EW) i=straight(NS) j=straight(NS) k=decoy(EW)
+ *    solution: a→ES  b→NS  c→SW  d→NS  e→N  f→N  g→NS  h→EW  i→NS  j→EW
+ * 
+ * L03  5x5  par 4  lamps 2  decoys 0
+ *    . . j g d
+ *    . . . . h
+ *    . . . . b
+ *    . . l . e
+ *    c k i f a
+ *    legend: a=elbow(SW) b=straight(NS) c=source(E) d=elbow(ES) e=straight(NS) f=straight(EW) g=straight(EW) h=straight(NS) i=tee(NEW) j=lamp(N) k=straight(EW) l=lamp(E)
+ *    solution: a→NW  b→NS  c→E  d→SW  e→NS  f→EW  g→EW  h→NS  i→NEW  j→E  k→EW  l→S
+ * 
+ * L04  6x6  par 5  lamps 1  decoys 1
+ *    c a h e b j
+ *    k . . . . d
+ *    f . . . . l
+ *    g . . . . m
+ *    . . . . . i
+ *    . . . n . .
+ *    legend: a=straight(NS) b=straight(EW) c=elbow(ES) d=straight(NS) e=straight(EW) f=straight(EW) g=source(W) h=straight(EW) i=lamp(W) j=elbow(SW) k=straight(NS) l=straight(NS) m=straight(EW) n=decoy(ESW)
+ *    solution: a→EW  b→EW  c→ES  d→NS  e→EW  f→NS  g→N  h→EW  i→N  j→SW  k→NS  l→NS  m→NS
+ * 
+ * L05  6x6  par 6  lamps 2  decoys 2
+ *    c a i f b j
+ *    k o . . . e
+ *    g . . . . m
+ *    h d l . . n
+ *    . . . . . .
+ *    . . q p . .
+ *    legend: a=tee(NES) b=straight(NS) c=elbow(NE) d=straight(EW) e=straight(NS) f=straight(NS) g=straight(EW) h=elbow(NW) i=straight(EW) j=elbow(SW) k=straight(NS) l=source(W) m=straight(NS) n=lamp(N) o=lamp(N) p=decoy(NS) q=decoy(NEW)
+ *    solution: a→ESW  b→EW  c→ES  d→EW  e→NS  f→EW  g→NS  h→NE  i→EW  j→SW  k→NS  l→W  m→NS  n→N  o→N
+ * 
+ * L06  6x6  par 7  lamps 2  decoys 2
+ *    d a j g c l
+ *    m . p . . e
+ *    h . . . . n
+ *    i . . . . o
+ *    . . . . . k
+ *    . q r . f b
+ *    legend: a=straight(EW) b=elbow(SW) c=straight(EW) d=elbow(ES) e=straight(EW) f=source(E) g=straight(EW) h=straight(EW) i=lamp(N) j=tee(NES) k=straight(NS) l=elbow(ES) m=straight(NS) n=straight(EW) o=straight(EW) p=lamp(N) q=decoy(ES) r=decoy(EW)
+ *    solution: a→EW  b→NW  c→EW  d→ES  e→NS  f→E  g→EW  h→NS  i→N  j→ESW  k→NS  l→SW  m→NS  n→NS  o→NS  p→N
+ * 
+ * L07  7x7  par 8  lamps 2  decoys 1
+ *    . . i g a m h
+ *    . . . . . . p
+ *    . . . . . r k
+ *    . . . j . . n
+ *    . . . c . . d
+ *    . s . o . . l
+ *    . . . q f b e
+ *    legend: a=straight(EW) b=straight(NS) c=straight(NS) d=straight(EW) e=elbow(SW) f=straight(EW) g=straight(NS) h=elbow(ES) i=source(E) j=lamp(S) k=tee(NSW) l=straight(NS) m=straight(NS) n=straight(NS) o=straight(EW) p=straight(NS) q=elbow(NE) r=lamp(N) s=decoy(NS)
+ *    solution: a→EW  b→EW  c→NS  d→NS  e→NW  f→EW  g→EW  h→SW  i→E  j→S  k→NSW  l→NS  m→EW  n→NS  o→NS  p→NS  q→NE  r→E
+ * 
+ * L08  7x7  par 9  lamps 3  decoys 2
+ *    e a j g c k i
+ *    l f b n h d m
+ *    . o . p . . .
+ *    . . . . . . .
+ *    . . . q . . .
+ *    . . . . . . .
+ *    . . r . . . .
+ *    legend: a=straight(NS) b=straight(NS) c=straight(EW) d=straight(NS) e=elbow(ES) f=tee(NES) g=straight(EW) h=straight(NS) i=source(W) j=straight(EW) k=straight(EW) l=elbow(NE) m=lamp(S) n=tee(NES) o=lamp(W) p=lamp(W) q=decoy(NS) r=decoy(ES)
+ *    solution: a→EW  b→EW  c→EW  d→EW  e→ES  f→ESW  g→EW  h→EW  i→W  j→EW  k→EW  l→NE  m→W  n→ESW  o→N  p→N
+ * 
+ * L09  7x7  par 10  lamps 1  decoys 3
+ *    . . c n l d o
+ *    . . . f . . e
+ *    . . . p . . q
+ *    . u . h . . j
+ *    . . . a . . b
+ *    . t . k . . i
+ *    . v . s m g r
+ *    legend: a=straight(EW) b=straight(NS) c=source(N) d=straight(NS) e=straight(EW) f=lamp(S) g=straight(NS) h=straight(NS) i=straight(NS) j=straight(EW) k=straight(EW) l=straight(NS) m=straight(EW) n=straight(EW) o=elbow(ES) p=straight(NS) q=straight(NS) r=elbow(SW) s=elbow(NE) t=decoy(NSW) u=decoy(NS) v=decoy(EW)
+ *    solution: a→NS  b→NS  c→E  d→EW  e→NS  f→S  g→EW  h→NS  i→NS  j→NS  k→NS  l→EW  m→EW  n→EW  o→SW  p→NS  q→NS  r→NW  s→NE
+ * 
+ * L10  8x8  par 11  lamps 1  decoys 3
+ *    p j b q l c s k
+ *    d . . . . m e t
+ *    r . . . . . . .
+ *    h . . . . . . .
+ *    a . . . . . . .
+ *    i . y . . . . .
+ *    v . . . . . x .
+ *    n g u o f . w .
+ *    legend: a=straight(EW) b=straight(EW) c=straight(NS) d=straight(NS) e=straight(EW) f=source(W) g=straight(NS) h=straight(EW) i=straight(EW) j=straight(EW) k=elbow(SW) l=straight(NS) m=lamp(E) n=elbow(NW) o=straight(EW) p=elbow(NE) q=straight(EW) r=straight(NS) s=straight(NS) t=elbow(SW) u=straight(EW) v=straight(EW) w=decoy(ESW) x=decoy(NS) y=decoy(EW)
+ *    solution: a→NS  b→EW  c→EW  d→NS  e→EW  f→W  g→EW  h→NS  i→NS  j→EW  k→SW  l→EW  m→E  n→NE  o→EW  p→ES  q→EW  r→NS  s→EW  t→NW  u→EW  v→NS
+ * 
+ * L11  8x8  par 12  lamps 2  decoys 4
+ *    r k c s l d u .
+ *    e . . . . y . .
+ *    t . z A . . . .
+ *    i . . . . . . .
+ *    a . C B . . . q
+ *    j . . . . . . b
+ *    w . . . . . . o
+ *    m g v n f x p h
+ *    legend: a=straight(EW) b=straight(NS) c=straight(EW) d=tee(ESW) e=straight(EW) f=straight(NS) g=straight(NS) h=elbow(SW) i=straight(EW) j=straight(EW) k=straight(EW) l=straight(EW) m=elbow(NE) n=straight(EW) o=straight(EW) p=straight(EW) q=source(E) r=elbow(ES) s=straight(EW) t=straight(NS) u=lamp(S) v=straight(EW) w=straight(EW) x=straight(EW) y=lamp(W) z=decoy(ES) A=decoy(NEW) B=decoy(NEW) C=decoy(NEW)
+ *    solution: a→NS  b→NS  c→EW  d→ESW  e→NS  f→EW  g→EW  h→NW  i→NS  j→NS  k→EW  l→EW  m→NE  n→EW  o→NS  p→EW  q→S  r→ES  s→EW  t→NS  u→W  v→EW  w→NS  x→EW  y→N
+ * 
+ * L12  8x8  par 13  lamps 3  decoys 4
+ *    . C . u m f v l
+ *    . . . g B . . x
+ *    . . . w . . . n
+ *    . F . j a . . c
+ *    . . . b t . . s
+ *    E . A k d . . e
+ *    . . . z o . . q
+ *    D . . p h y r i
+ *    legend: a=source(S) b=straight(NS) c=straight(NS) d=straight(NS) e=straight(EW) f=straight(EW) g=straight(NS) h=elbow(NW) i=elbow(SW) j=straight(NS) k=tee(NSW) l=elbow(SW) m=tee(NES) n=straight(EW) o=straight(EW) p=lamp(W) q=straight(EW) r=straight(NS) s=straight(NS) t=straight(EW) u=elbow(ES) v=straight(NS) w=straight(NS) x=straight(NS) y=straight(EW) z=straight(EW) A=lamp(N) B=lamp(N) C=decoy(EW) D=decoy(NS) E=decoy(ESW) F=decoy(NS)
+ *    solution: a→S  b→NS  c→NS  d→NS  e→NS  f→EW  g→NS  h→NE  i→NW  j→NS  k→NSW  l→SW  m→ESW  n→NS  o→NS  p→N  q→NS  r→EW  s→NS  t→NS  u→ES  v→EW  w→NS  x→NS  y→EW  z→NS  A→E  B→N
+ */
+var LEVELS=[{"id":"L01","n":5,"par":2,"tiles":[{"r":0,"c":1,"type":"straight","init":1},{"r":2,"c":4,"type":"source","init":0},{"r":0,"c":4,"type":"elbow","init":2},{"r":0,"c":0,"type":"elbow","init":1},{"r":0,"c":3,"type":"straight","init":0},{"r":2,"c":0,"type":"lamp","init":0},{"r":1,"c":4,"type":"straight","init":3},{"r":0,"c":2,"type":"straight","init":1},{"r":1,"c":0,"type":"straight","init":0}]},{"id":"L02","n":5,"par":3,"tiles":[{"r":0,"c":1,"type":"elbow","init":0},{"r":2,"c":4,"type":"straight","init":0},{"r":0,"c":4,"type":"elbow","init":2},{"r":2,"c":1,"type":"straight","init":3},{"r":3,"c":4,"type":"source","init":0},{"r":3,"c":1,"type":"lamp","init":0},{"r":1,"c":1,"type":"straight","init":0},{"r":0,"c":3,"type":"straight","init":1},{"r":1,"c":4,"type":"straight","init":0},{"r":0,"c":2,"type":"straight","init":0},{"r":4,"c":3,"type":"straight","init":1}]},{"id":"L03","n":5,"par":4,"tiles":[{"r":4,"c":4,"type":"elbow","init":2},{"r":2,"c":4,"type":"straight","init":0},{"r":4,"c":0,"type":"source","init":1},{"r":0,"c":4,"type":"elbow","init":1},{"r":3,"c":4,"type":"straight","init":0},{"r":4,"c":3,"type":"straight","init":1},{"r":0,"c":3,"type":"straight","init":1},{"r":1,"c":4,"type":"straight","init":0},{"r":4,"c":2,"type":"tee","init":3},{"r":0,"c":2,"type":"lamp","init":0},{"r":4,"c":1,"type":"straight","init":1},{"r":3,"c":2,"type":"lamp","init":1}]},{"id":"L04","n":6,"par":5,"tiles":[{"r":0,"c":1,"type":"straight","init":0},{"r":0,"c":4,"type":"straight","init":1},{"r":0,"c":0,"type":"elbow","init":1},{"r":1,"c":5,"type":"straight","init":0},{"r":0,"c":3,"type":"straight","init":1},{"r":2,"c":0,"type":"straight","init":3},{"r":3,"c":0,"type":"source","init":3},{"r":0,"c":2,"type":"straight","init":1},{"r":4,"c":5,"type":"lamp","init":3},{"r":0,"c":5,"type":"elbow","init":2},{"r":1,"c":0,"type":"straight","init":0},{"r":2,"c":5,"type":"straight","init":0},{"r":3,"c":5,"type":"straight","init":3},{"r":5,"c":3,"type":"tee","init":1}]},{"id":"L05","n":6,"par":6,"tiles":[{"r":0,"c":1,"type":"tee","init":0},{"r":0,"c":4,"type":"straight","init":0},{"r":0,"c":0,"type":"elbow","init":0},{"r":3,"c":1,"type":"straight","init":1},{"r":1,"c":5,"type":"straight","init":0},{"r":0,"c":3,"type":"straight","init":0},{"r":2,"c":0,"type":"straight","init":3},{"r":3,"c":0,"type":"elbow","init":3},{"r":0,"c":2,"type":"straight","init":1},{"r":0,"c":5,"type":"elbow","init":2},{"r":1,"c":0,"type":"straight","init":0},{"r":3,"c":2,"type":"source","init":3},{"r":2,"c":5,"type":"straight","init":0},{"r":3,"c":5,"type":"lamp","init":0},{"r":1,"c":1,"type":"lamp","init":0},{"r":5,"c":3,"type":"straight","init":0},{"r":5,"c":2,"type":"tee","init":3}]},{"id":"L06","n":6,"par":7,"tiles":[{"r":0,"c":1,"type":"straight","init":1},{"r":5,"c":5,"type":"elbow","init":2},{"r":0,"c":4,"type":"straight","init":1},{"r":0,"c":0,"type":"elbow","init":1},{"r":1,"c":5,"type":"straight","init":3},{"r":5,"c":4,"type":"source","init":1},{"r":0,"c":3,"type":"straight","init":1},{"r":2,"c":0,"type":"straight","init":3},{"r":3,"c":0,"type":"lamp","init":0},{"r":0,"c":2,"type":"tee","init":0},{"r":4,"c":5,"type":"straight","init":0},{"r":0,"c":5,"type":"elbow","init":1},{"r":1,"c":0,"type":"straight","init":0},{"r":2,"c":5,"type":"straight","init":3},{"r":3,"c":5,"type":"straight","init":3},{"r":1,"c":2,"type":"lamp","init":0},{"r":5,"c":1,"type":"elbow","init":1},{"r":5,"c":2,"type":"straight","init":1}]},{"id":"L07","n":7,"par":8,"tiles":[{"r":0,"c":4,"type":"straight","init":1},{"r":6,"c":5,"type":"straight","init":0},{"r":4,"c":3,"type":"straight","init":0},{"r":4,"c":6,"type":"straight","init":3},{"r":6,"c":6,"type":"elbow","init":2},{"r":6,"c":4,"type":"straight","init":1},{"r":0,"c":3,"type":"straight","init":0},{"r":0,"c":6,"type":"elbow","init":1},{"r":0,"c":2,"type":"source","init":1},{"r":3,"c":3,"type":"lamp","init":2},{"r":2,"c":6,"type":"tee","init":2},{"r":5,"c":6,"type":"straight","init":0},{"r":0,"c":5,"type":"straight","init":0},{"r":3,"c":6,"type":"straight","init":0},{"r":5,"c":3,"type":"straight","init":3},{"r":1,"c":6,"type":"straight","init":0},{"r":6,"c":3,"type":"elbow","init":0},{"r":2,"c":5,"type":"lamp","init":0},{"r":5,"c":1,"type":"straight","init":0}]},{"id":"L08","n":7,"par":9,"tiles":[{"r":0,"c":1,"type":"straight","init":0},{"r":1,"c":2,"type":"straight","init":0},{"r":0,"c":4,"type":"straight","init":1},{"r":1,"c":5,"type":"straight","init":0},{"r":0,"c":0,"type":"elbow","init":1},{"r":1,"c":1,"type":"tee","init":0},{"r":0,"c":3,"type":"straight","init":1},{"r":1,"c":4,"type":"straight","init":0},{"r":0,"c":6,"type":"source","init":3},{"r":0,"c":2,"type":"straight","init":1},{"r":0,"c":5,"type":"straight","init":1},{"r":1,"c":0,"type":"elbow","init":0},{"r":1,"c":6,"type":"lamp","init":2},{"r":1,"c":3,"type":"tee","init":0},{"r":2,"c":1,"type":"lamp","init":3},{"r":2,"c":3,"type":"lamp","init":3},{"r":4,"c":3,"type":"straight","init":2},{"r":6,"c":2,"type":"elbow","init":1}]},{"id":"L09","n":7,"par":10,"tiles":[{"r":4,"c":3,"type":"straight","init":3},{"r":4,"c":6,"type":"straight","init":0},{"r":0,"c":2,"type":"source","init":0},{"r":0,"c":5,"type":"straight","init":0},{"r":1,"c":6,"type":"straight","init":3},{"r":1,"c":3,"type":"lamp","init":2},{"r":6,"c":5,"type":"straight","init":0},{"r":3,"c":3,"type":"straight","init":0},{"r":5,"c":6,"type":"straight","init":0},{"r":3,"c":6,"type":"straight","init":3},{"r":5,"c":3,"type":"straight","init":3},{"r":0,"c":4,"type":"straight","init":0},{"r":6,"c":4,"type":"straight","init":1},{"r":0,"c":3,"type":"straight","init":1},{"r":0,"c":6,"type":"elbow","init":1},{"r":2,"c":3,"type":"straight","init":0},{"r":2,"c":6,"type":"straight","init":0},{"r":6,"c":6,"type":"elbow","init":2},{"r":6,"c":3,"type":"elbow","init":0},{"r":5,"c":1,"type":"tee","init":2},{"r":3,"c":1,"type":"straight","init":0},{"r":6,"c":1,"type":"straight","init":1}]},{"id":"L10","n":8,"par":11,"tiles":[{"r":4,"c":0,"type":"straight","init":3},{"r":0,"c":2,"type":"straight","init":1},{"r":0,"c":5,"type":"straight","init":0},{"r":1,"c":0,"type":"straight","init":0},{"r":1,"c":6,"type":"straight","init":1},{"r":7,"c":4,"type":"source","init":3},{"r":7,"c":1,"type":"straight","init":0},{"r":3,"c":0,"type":"straight","init":3},{"r":5,"c":0,"type":"straight","init":3},{"r":0,"c":1,"type":"straight","init":1},{"r":0,"c":7,"type":"elbow","init":2},{"r":0,"c":4,"type":"straight","init":0},{"r":1,"c":5,"type":"lamp","init":1},{"r":7,"c":0,"type":"elbow","init":3},{"r":7,"c":3,"type":"straight","init":1},{"r":0,"c":0,"type":"elbow","init":0},{"r":0,"c":3,"type":"straight","init":1},{"r":2,"c":0,"type":"straight","init":0},{"r":0,"c":6,"type":"straight","init":0},{"r":1,"c":7,"type":"elbow","init":2},{"r":7,"c":2,"type":"straight","init":1},{"r":6,"c":0,"type":"straight","init":3},{"r":7,"c":6,"type":"tee","init":1},{"r":6,"c":6,"type":"straight","init":0},{"r":5,"c":2,"type":"straight","init":3}]},{"id":"L11","n":8,"par":12,"tiles":[{"r":4,"c":0,"type":"straight","init":3},{"r":5,"c":7,"type":"straight","init":0},{"r":0,"c":2,"type":"straight","init":1},{"r":0,"c":5,"type":"tee","init":1},{"r":1,"c":0,"type":"straight","init":3},{"r":7,"c":4,"type":"straight","init":0},{"r":7,"c":1,"type":"straight","init":0},{"r":7,"c":7,"type":"elbow","init":2},{"r":3,"c":0,"type":"straight","init":3},{"r":5,"c":0,"type":"straight","init":3},{"r":0,"c":1,"type":"straight","init":1},{"r":0,"c":4,"type":"straight","init":1},{"r":7,"c":0,"type":"elbow","init":0},{"r":7,"c":3,"type":"straight","init":1},{"r":6,"c":7,"type":"straight","init":3},{"r":7,"c":6,"type":"straight","init":1},{"r":4,"c":7,"type":"source","init":1},{"r":0,"c":0,"type":"elbow","init":1},{"r":0,"c":3,"type":"straight","init":1},{"r":2,"c":0,"type":"straight","init":0},{"r":0,"c":6,"type":"lamp","init":2},{"r":7,"c":2,"type":"straight","init":1},{"r":6,"c":0,"type":"straight","init":3},{"r":7,"c":5,"type":"straight","init":1},{"r":1,"c":5,"type":"lamp","init":3},{"r":2,"c":2,"type":"elbow","init":1},{"r":2,"c":3,"type":"tee","init":3},{"r":4,"c":3,"type":"tee","init":3},{"r":4,"c":2,"type":"tee","init":3}]},{"id":"L12","n":8,"par":13,"tiles":[{"r":3,"c":4,"type":"source","init":2},{"r":4,"c":3,"type":"straight","init":0},{"r":3,"c":7,"type":"straight","init":0},{"r":5,"c":4,"type":"straight","init":0},{"r":5,"c":7,"type":"straight","init":3},{"r":0,"c":5,"type":"straight","init":1},{"r":1,"c":3,"type":"straight","init":0},{"r":7,"c":4,"type":"elbow","init":3},{"r":7,"c":7,"type":"elbow","init":2},{"r":3,"c":3,"type":"straight","init":0},{"r":5,"c":3,"type":"tee","init":2},{"r":0,"c":7,"type":"elbow","init":2},{"r":0,"c":4,"type":"tee","init":0},{"r":2,"c":7,"type":"straight","init":3},{"r":6,"c":4,"type":"straight","init":3},{"r":7,"c":3,"type":"lamp","init":3},{"r":6,"c":7,"type":"straight","init":3},{"r":7,"c":6,"type":"straight","init":0},{"r":4,"c":7,"type":"straight","init":0},{"r":4,"c":4,"type":"straight","init":3},{"r":0,"c":3,"type":"elbow","init":1},{"r":0,"c":6,"type":"straight","init":0},{"r":2,"c":3,"type":"straight","init":0},{"r":1,"c":7,"type":"straight","init":0},{"r":7,"c":5,"type":"straight","init":1},{"r":6,"c":3,"type":"straight","init":3},{"r":5,"c":2,"type":"lamp","init":0},{"r":1,"c":4,"type":"lamp","init":0},{"r":0,"c":1,"type":"straight","init":1},{"r":7,"c":0,"type":"straight","init":2},{"r":5,"c":0,"type":"tee","init":1},{"r":3,"c":1,"type":"straight","init":2}]}];
+
+/* =============== RULES ENGINE (mirrors build/engine.py) =============== */
+var BITS={N:1,E:2,S:4,W:8};
+var DIRS=[["N",1,-1,0],["E",2,0,1],["S",4,1,0],["W",8,0,-1]];
+var OPP={1:4,4:1,2:8,8:2};
+var BASE={source:1,lamp:1,straight:5,elbow:3,tee:7,cross:15};
+function rotMask(m){var o=0;if(m&1)o|=2;if(m&2)o|=4;if(m&4)o|=8;if(m&8)o|=1;return o;}
+function connOf(type,rot){var m=BASE[type];rot=((rot%4)+4)%4;while(rot-->0)m=rotMask(m);return m;}
+
+/* =============== persistence =============== */
+var STORE_KEY="loopback.progress.v1";
+function loadProgress(){
+  var d={unlocked:0,best:{},completed:false};
+  try{
+    var raw=localStorage.getItem(STORE_KEY);
+    if(raw){var p=JSON.parse(raw);
+      if(p&&typeof p==="object"){if(typeof p.unlocked==="number")d.unlocked=p.unlocked;if(p.best&&typeof p.best==="object")d.best=p.best;if(p.completed)d.completed=!!p.completed;}
+    }
+  }catch(e){}
+  return d;
+}
+function saveProgress(){try{localStorage.setItem(STORE_KEY,JSON.stringify(progress));}catch(e){}}
+var progress=loadProgress();
+var state={li:0,board:null,moves:0,undo:[],focus:null,solved:false,done:false};
+
+var $=function(id){return document.getElementById(id);};
+var liveEl=$("live");
+function say(msg){liveEl.textContent="";setTimeout(function(){liveEl.textContent=msg;},40);}
+
+/* =============== board =============== */
+function buildBoard(li){
+  var lv=LEVELS[li],grid=[];
+  for(var r=0;r<lv.n;r++){grid.push([]);for(var c=0;c<lv.n;c++)grid[r].push(null);}
+  for(var i=0;i<lv.tiles.length;i++){var t=lv.tiles[i];grid[t.r][t.c]={type:t.type,rot:t.init,idx:i};}
+  return grid;
+}
+function boardSnapshot(){
+  var lv=LEVELS[state.li],arr=[],g=state.board;
+  for(var r=0;r<lv.n;r++)for(var c=0;c<lv.n;c++)if(g[r][c])arr.push(g[r][c].rot);
+  return arr;
+}
+function restoreSnapshot(arr){
+  var lv=LEVELS[state.li],g=state.board,k=0;
+  for(var r=0;r<lv.n;r++)for(var c=0;c<lv.n;c++)if(g[r][c])g[r][c].rot=arr[k++];
+}
+
+/* =============== flood fill =============== */
+function flood(grid){
+  var n=grid.length,src=null,keyed={};
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++){
+    var t=grid[r][c];
+    if(t){keyed[r+","+c]=t;if(t.type==="source")src={r:r,c:c};}
+  }
+  var powered={},lampCells=[],lampsTotal=0;
+  if(src){var stack=[src];powered[src.r+","+src.c]=1;
+    while(stack.length){
+      var p=stack.pop(),t=keyed[p.r+","+p.c],m=connOf(t.type,t.rot);
+      for(var i=0;i<4;i++){
+        var d=DIRS[i];
+        if(!(m&d[1]))continue;
+        var nr=p.r+d[2],nc=p.c+d[3];
+        if(nr<0||nr>=n||nc<0||nc>=n)continue;
+        if(!keyed[nr+","+nc])continue;
+        if(!(connOf(keyed[nr+","+nc].type,keyed[nr+","+nc].rot)&OPP[d[1]]))continue;
+        var k2=nr+","+nc;if(powered[k2])continue;
+        powered[k2]=1;stack.push({r:nr,c:nc});
+      }
+    }
+  }
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++){
+    var tt=grid[r][c];
+    if(tt&&tt.type==="lamp"){lampsTotal++;lampCells.push([r,c]);}
+  }
+  var lit=0;
+  for(var i=0;i<lampCells.length;i++)if(powered[lampCells[i][0]+","+lampCells[i][1]])lit++;
+  return {powered:powered,lit:lit,lampsTotal:lampsTotal,lampCells:lampCells};
+}
+
+/* =============== rendering =============== */
+function edgePts(S,mask){
+  var half=S/2,pts=[];
+  if(mask&BITS.N)pts.push([0,-half]);
+  if(mask&BITS.E)pts.push([half,0]);
+  if(mask&BITS.S)pts.push([0,half]);
+  if(mask&BITS.W)pts.push([-half,0]);
+  return pts;
+}
+function renderBoard(){
+  var S=70,n=state.board.length,W=n*S,svg=$("board");
+  svg.setAttribute("viewBox","0 0 "+W+" "+W);
+  svg.style.width=W+"px";svg.style.height=W+"px";
+  var fl=flood(state.board);
+  var html="";
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++){
+    var t=state.board[r][c];
+    if(!t){html+='<rect class="cellbg" x="'+(c*S+3)+'" y="'+(r*S+3)+'" width="'+(S-6)+'" height="'+(S-6)+'" rx="8"/>';continue;}
+    var powered=!!fl.powered[r+","+c];
+    var lit= t.type==="lamp"&&powered;
+    var cls="tile "+t.type+(powered?" powered":"")+(lit?" lit":"");
+    var local="";
+    var bmask=BASE[t.type];
+    var pts=edgePts(S,bmask),i;
+    for(i=0;i<pts.length;i++)local+='<line class="conn" x1="0" y1="0" x2="'+pts[i][0]+'" y2="'+pts[i][1]+'"/>';
+    local+='<circle class="pin" cx="0" cy="0" r="4"/>';
+    if(t.type==="source")local+='<circle class="core" cx="0" cy="0" r="10"/>';
+    if(t.type==="lamp"){
+      if(lit){
+        local+='<circle class="bulb" cx="0" cy="-8" r="12"/>';
+        local+='<path class="tick" d="M-6 -8 L-1 -3 L6 -13"/>';
+      } else {
+        local+='<path class="bulb" d="M-10,-8 A10 10 0 0 0 10 -8 Z M0,-8 L0,4 M-3,4 L3,4" transform="translate(0,-6)"/>';
+      }
+    }
+    var degs=((t.rot%4)+4)%4*90;
+    html+='<g class="'+cls+'" data-r="'+r+'" data-c="'+c+'" transform="translate('+(c*S)+','+(r*S)+')">'
+      +'<rect class="cellbg" x="3" y="3" width="'+(S-6)+'" height="'+(S-6)+'" rx="8"/>'
+      +'<g class="rotg" transform="rotate('+degs+' '+(S/2)+' '+(S/2)+')" style="transform-origin:'+(S/2)+'px '+(S/2)+'px">'
+      +local+'</g></g>';
+  }
+  if(state.focus){
+    html+='<rect class="focbox" x="'+(state.focus.c*S+5)+'" y="'+(state.focus.r*S+5)+'" width="'+(S-10)+'" height="'+(S-10)+'" rx="8"/>';
+  }
+  svg.innerHTML=html;
+  Array.prototype.forEach.call(svg.querySelectorAll(".tile"),function(g){
+    g.addEventListener("click",function(){rotateCell(+g.getAttribute("data-r"),+g.getAttribute("data-c"));});
+  });
+  $("g-level").textContent="Level "+(state.li+1);
+  $("g-par").textContent="par "+LEVELS[state.li].par;
+  $("g-moves").textContent=state.moves;
+  var best=progress.best[LEVELS[state.li].id];
+  $("g-best").textContent=(best===undefined?"—":best);
+  if(fl.lampsTotal>1){$("g-lamps").style.display="";$("g-lamps").textContent="lamps "+fl.lit+"/"+fl.lampsTotal;}
+  else{$("g-lamps").style.display="none";}
+}
+
+/* =============== actions =============== */
+function rotateCell(r,c){
+  var t=state.board[r][c];
+  if(!t||state.done)return;
+  state.undo.push({rots:boardSnapshot(),moves:state.moves});
+  if(state.undo.length>500)state.undo.shift();
+  t.rot=(t.rot+1)%4;state.moves++;
+  renderBoard();
+  var fl=flood(state.board);
+  if(fl.lampsTotal>1)say("Lamp "+fl.lit+" of "+fl.lampsTotal+" lit");
+  if(fl.lit===fl.lampsTotal&&fl.lampsTotal>0)onWin();
+}
+function undo(){
+  if(!state.undo.length)return;
+  var s=state.undo.pop();restoreSnapshot(s.rots);state.moves=s.moves;
+  renderBoard();say("Undo");
+}
+function reset(){
+  var lv=LEVELS[state.li];
+  for(var r=0;r<lv.n;r++)for(var c=0;c<lv.n;c++)
+    if(state.board[r][c])state.board[r][c].rot=lv.tiles[state.board[r][c].idx].init;
+  state.moves=0;state.undo=[];state.done=false;
+  renderBoard();say("Level reset");
+}
+function onWin(){
+  if(state.done)return;
+  state.done=true;state.solved=true;
+  var lv=LEVELS[state.li];
+  if(progress.best[lv.id]===undefined||state.moves<progress.best[lv.id])progress.best[lv.id]=state.moves;
+  if(state.li===LEVELS.length-1)progress.completed=true;
+  if(state.li>=progress.unlocked)progress.unlocked=Math.min(LEVELS.length-1,state.li+1);
+  saveProgress();
+  var nlamps=flood(state.board).lampsTotal;
+  $("win-moves").textContent=state.moves;
+  $("win-par").textContent=lv.par;
+  $("win-best").textContent=(progress.best[lv.id]===undefined?"—":progress.best[lv.id]);
+  var hasNext=state.li<LEVELS.length-1,nx=$("win-next");
+  nx.style.display=hasNext?"":"none";
+  nx.textContent=hasNext?"Next level":"Play again";
+  $("win-sub").textContent="All "+nlamps+" lamp"+(nlamps>1?"s":"")+" lit in "+state.moves+" move"+(state.moves===1?"":"s")+".";
+  $("screen-win").classList.remove("hidden");
+  say("Level complete in "+state.moves+" moves");
+  renderBoard();
+}
+
+/* =============== navigation =============== */
+function gotoLevel(i){
+  state.li=i;state.board=buildBoard(i);
+  state.moves=0;state.undo=[];state.solved=false;state.done=false;
+  state.focus={r:0,c:0};
+  $("screen-start").classList.add("hidden");
+  $("screen-game").classList.remove("hidden");
+  $("screen-win").classList.add("hidden");
+  $("screen-menu").classList.add("hidden");
+  buildMenuGrid();
+  renderBoard();
+  say("Level "+(i+1)+". Rotate wires to light all lamps. Par "+LEVELS[i].par);
+}
+
+/* =============== level menu =============== */
+function buildMenuGrid(){
+  var g=$("menu-grid");g.innerHTML="";
+  for(var i=0;i<LEVELS.length;i++){
+    var lv=LEVELS[i],unlocked=i<=progress.unlocked;
+    var b=document.createElement("button");
+    b.className="level"+(unlocked?"":" locked")+(progress.best[lv.id]!==undefined?" beat":"");
+    b.setAttribute("data-i",i);
+    b.setAttribute("aria-label","Level "+(i+1)+(unlocked?"":" (locked)")+(progress.best[lv.id]!==undefined?" best "+progress.best[lv.id]:"")+" par "+lv.par);
+    var bv=progress.best[lv.id];
+    b.innerHTML='<span class="n">'+(i+1)+'</span><span class="b">'+(bv===undefined?"—":bv)+'</span>';
+    (function(i){b.addEventListener("click",function(){
+      if(i<=progress.unlocked){closeMenu();gotoLevel(i);}
+    });})(i);
+    g.appendChild(b);
+  }
+  var lbl=$("btn-select-start");
+  if(lbl)lbl.textContent="Choose Level ("+(progress.unlocked+1)+"/"+LEVELS.length+")";
+}
+function openMenu(){$("screen-menu").classList.remove("hidden");buildMenuGrid();}
+function closeMenu(){$("screen-menu").classList.add("hidden");}
+
+/* =============== keyboard =============== */
+function moveFocus(k){
+  var f=state.focus;if(!f){state.focus={r:0,c:0};renderBoard();return;}
+  var n=state.board.length,nr=f.r,nc=f.c;
+  if(k==="ArrowUp")nr--;else if(k==="ArrowDown")nr++;else if(k==="ArrowLeft")nc--;else if(k==="ArrowRight")nc++;
+  if(nr<0||nr>=n||nc<0||nc>=n)return;
+  state.focus={r:nr,c:nc};renderBoard();
+}
+document.addEventListener("keydown",function(e){
+  var k=e.key;
+  var menuShown=$("screen-menu")&&!$("screen-menu").classList.contains("hidden");
+  var startShown=$("screen-start")&&!$("screen-start").classList.contains("hidden");
+  if(menuShown){
+    if(k==="Escape"){closeMenu();e.preventDefault();}
+    return;
+  }
+  if(startShown)return;
+  if(k==="Escape"){openMenu();e.preventDefault();return;}
+  if(!state.board)return;
+  if(k==="ArrowUp"||k==="ArrowDown"||k==="ArrowLeft"||k==="ArrowRight"){e.preventDefault();moveFocus(k);}
+  else if(k==="Enter"||k===" "){
+    var winShown=$("screen-win")&&!$("screen-win").classList.contains("hidden");
+    if(winShown)return;
+    e.preventDefault();
+    if(state.focus)rotateCell(state.focus.r,state.focus.c);
+  }
+  else if(k==="u"||k==="U")undo();
+  else if(k==="r"||k==="R")reset();
+});
+
+/* =============== startup =============== */
+$("btn-play").addEventListener("click",function(){gotoLevel(0);});
+$("btn-select-start").addEventListener("click",function(){openMenu();});
+$("btn-menu").addEventListener("click",openMenu);
+$("btn-reset").addEventListener("click",reset);
+$("btn-undo").addEventListener("click",undo);
+$("menu-close").addEventListener("click",closeMenu);
+$("win-replay").addEventListener("click",function(){gotoLevel(state.li);});
+$("win-next").addEventListener("click",function(){gotoLevel(state.li+1<LEVELS.length?state.li+1:0);});
+$("win-menu").addEventListener("click",function(){$("screen-win").classList.add("hidden");openMenu();});
+buildMenuGrid();
+</script>
+</body>
+</html>

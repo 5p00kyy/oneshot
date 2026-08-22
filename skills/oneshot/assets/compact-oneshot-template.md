@@ -1,67 +1,24 @@
-# Compact One-Shot Prompt Template
+# Compact OneShot templates
 
-> Replace all placeholders and remove this note before delivery.
+Use only the selected profile. Replace placeholders, remove drafting notes, and omit headings that do not improve the final prompt.
 
-# <TASK TITLE>
+## Brief
 
-## Role
+Create **<artifact>** that **<observable outcome>**. Requirements: **<essential constraints>**. Return **<exact format>**. Before returning, **<one proportionate self-check>**.
 
-Act as <relevant expert role>.
+A finished Brief may be one sentence and should be no more than 120 words by default.
 
-## Goal
+## Benchmark
 
-Create <finished artifact> for <audience> so they can <observable outcome>.
+Create **<one finished artifact>** in **<declared envelope>**.
 
-This is one self-contained handoff. Use available tools, inspect supplied material, make reasonable assumptions, complete the work, verify it, and repair issues without stopping at a plan.
+It must:
 
-## Context and sources
+- **<provide the core behavior>**;
+- **<include a small fixed state or content requirement>**;
+- **<provide completion and reset or failure behavior where relevant>**;
+- **<meet the format or offline constraint needed for comparability>**.
 
-Use:
+Complete means **<short observable acceptance>**.
 
-1. <user-provided source>
-2. <existing repository or artifact>
-3. <official current documentation>
-
-<Material assumptions or reference-transformation rule.>
-
-## Requirements
-
-- <functional requirement>
-- <functional requirement>
-- <quality requirement translated into observable behavior>
-- <format or delivery requirement>
-- <safety, originality, or workspace boundary>
-
-## Workflow
-
-1. Inspect the inputs and environment.
-2. Research any current or uncertain technical facts.
-3. Implement the smallest complete path.
-4. Add required quality and edge-case handling.
-5. Run and inspect the real result.
-6. Fix failures.
-7. Reconcile the acceptance checks.
-
-## Priority
-
-Never cut:
-
-- <critical outcome>
-- <verification>
-
-Cut first if constrained:
-
-- <optional polish>
-
-## Acceptance
-
-The result is complete only when:
-
-- <observable check>
-- <observable check>
-- <failure or recovery check>
-- <format/build/export check>
-
-## Output
-
-Create <files/artifact> in <destination>. Return a concise handoff with what was created, how to use it, what was actually verified, and any genuine noncritical limitation. Do not claim success after failed verification.
+Keep the contestant prompt at or below 700 words. Exclude scoring, evaluator internals, hidden cases or fixtures, harness procedure, evidence collection, and retry policy; those belong in the challenge manifest or evaluator.

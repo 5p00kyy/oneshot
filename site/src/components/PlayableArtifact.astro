@@ -1,0 +1,131 @@
+---
+interface Props {
+  documentBase64: string;
+  title: string;
+  posterDataUrl?: string | null;
+  posterAlt: string;
+}
+
+const { documentBase64, title, posterDataUrl = null, posterAlt } = Astro.props;
+---
+
+<div class="playable-artifact" data-playable-shell data-document-base64={documentBase64}>
+  <div class="playable-stage">
+    {posterDataUrl ? <img class="playable-poster" src={posterDataUrl} alt={posterAlt} /> : <div class="playable-poster playable-poster-empty">Interactive HTML artifact</div>}
+    <iframe
+      class="playable-frame"
+      data-playable-frame
+      title={`Interactive sandbox: ${title}`}
+      sandbox="allow-scripts"
+      referrerpolicy="no-referrer"
+      csp="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; form-action 'none'; base-uri 'none'"
+      hidden
+    ></iframe>
+    <div class="playable-launch">
+      <p><strong>Run the artifact</strong><span>Starts only after your click, inside an opaque-origin sandbox with network and site access blocked.</span></p>
+      <button type="button" data-playable-launch>Play in sandbox</button>
+    </div>
+  </div>
+  <div class="playable-controls" hidden data-playable-controls>
+    <p data-playable-status role="status">Sandbox active. Click inside the game before using keyboard controls.</p>
+    <span>
+      <button type="button" data-playable-reset>Restart</button>
+      <button type="button" data-playable-stop>Stop</button>
+    </span>
+  </div>
+</div>
+
+<script>
+  const SANDBOX_POLICY = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; form-action 'none'; base-uri 'none'";
+
+  const STORAGE_SHIM = `(() => {
+    const values = new Map();
+    const storage = {
+      get length() { return values.size; },
+      clear() { values.clear(); },
+      getItem(key) { key = String(key); return values.has(key) ? values.get(key) : null; },
+      key(index) { return Array.from(values.keys())[Number(index)] ?? null; },
+      removeItem(key) { values.delete(String(key)); },
+      setItem(key, value) { values.set(String(key), String(value)); }
+    };
+    for (const name of ['localStorage', 'sessionStorage']) {
+      try { Object.defineProperty(window, name, { configurable: false, enumerable: true, value: storage }); } catch (_) {}
+    }
+  })();`;
+
+  function decodeDocument(encoded: string): string {
+    const binary = atob(encoded);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  }
+
+  function sandboxDocument(raw: string): string {
+    const parsed = new DOMParser().parseFromString(raw, "text/html");
+
+    parsed.querySelectorAll("base, iframe, frame, frameset, object, embed, applet, portal, fencedframe, link").forEach((node) => node.remove());
+    parsed.querySelectorAll("meta[http-equiv]").forEach((node) => {
+      const directive = node.getAttribute("http-equiv")?.trim().toLowerCase();
+      if (directive === "refresh" || directive === "content-security-policy") node.remove();
+    });
+
+    const urlAttributes = ["action", "formaction", "ping", "poster", "src", "srcset", "xlink:href"];
+    parsed.querySelectorAll("*").forEach((element) => {
+      element.removeAttribute("srcdoc");
+      element.removeAttribute("target");
+      element.removeAttribute("download");
+      for (const attribute of urlAttributes) {
+        const value = element.getAttribute(attribute);
+        if (!value) continue;
+        if (attribute === "src" && /^data:/i.test(value.trim())) continue;
+        if (attribute === "xlink:href" && value.trim().startsWith("#")) continue;
+        element.removeAttribute(attribute);
+      }
+      const href = element.getAttribute("href");
+      if (href && !href.trim().startsWith("#")) element.removeAttribute("href");
+    });
+
+    const escapedPolicy = SANDBOX_POLICY.replaceAll('"', "&quot;");
+    return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${escapedPolicy}"><script>${STORAGE_SHIM}<\/script>${parsed.head.innerHTML}</head><body>${parsed.body.innerHTML}</body></html>`;
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-playable-shell]").forEach((shell) => {
+    const frame = shell.querySelector<HTMLIFrameElement>("[data-playable-frame]");
+    const launch = shell.querySelector<HTMLElement>(".playable-launch");
+    const poster = shell.querySelector<HTMLElement>(".playable-poster");
+    const controls = shell.querySelector<HTMLElement>("[data-playable-controls]");
+    const status = shell.querySelector<HTMLElement>("[data-playable-status]");
+    const encoded = shell.dataset.documentBase64;
+    if (!frame || !launch || !poster || !controls || !status || !encoded) return;
+
+    let documentSource: string | null = null;
+    const start = () => {
+      try {
+        documentSource ??= sandboxDocument(decodeDocument(encoded));
+        frame.srcdoc = documentSource;
+        frame.hidden = false;
+        poster.hidden = true;
+        launch.hidden = true;
+        controls.hidden = false;
+        status.textContent = "Sandbox active. Click inside the game before using keyboard controls.";
+        frame.focus();
+      } catch {
+        status.textContent = "The artifact could not be decoded safely.";
+        controls.hidden = false;
+      }
+    };
+
+    shell.querySelector<HTMLButtonElement>("[data-playable-launch]")?.addEventListener("click", start);
+    shell.querySelector<HTMLButtonElement>("[data-playable-reset]")?.addEventListener("click", () => {
+      frame.srcdoc = documentSource ?? sandboxDocument(decodeDocument(encoded));
+      status.textContent = "Sandbox restarted. Click inside the game to return keyboard focus.";
+      frame.focus();
+    });
+    shell.querySelector<HTMLButtonElement>("[data-playable-stop]")?.addEventListener("click", () => {
+      frame.srcdoc = "";
+      frame.hidden = true;
+      poster.hidden = false;
+      launch.hidden = false;
+      controls.hidden = true;
+    });
+  });
+</script>

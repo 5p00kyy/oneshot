@@ -1,0 +1,122 @@
+---
+import Base from "../layouts/base.astro";
+---
+
+<Base
+  title="Contribute"
+  description="How to submit challenges and evidence-backed one-shot runs to the OneShot library."
+  active="contribute"
+>
+  <section class="hero hero-page">
+    <div class="container">
+      <div class="hero-strip" aria-hidden="true">
+        <span>OS / INTAKE-04</span>
+        <span>CHALLENGES · RUNS · FIXES</span>
+        <span>PR ONLY</span>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-statement">
+          <p class="hero-overline">Submission route</p>
+          <h1>Add signal, <em>not theatre.</em></h1>
+        </div>
+        <p class="lede">
+          The library grows by pull request. Every challenge and run passes the
+          same dependency-free validator before merge. Failed attempts are useful;
+          fabricated evidence is not.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="challenge-sub-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">01</span>
+        <h2 id="challenge-sub-heading">Submitting a challenge</h2>
+      </div>
+      <div class="prose">
+        <p>
+          A challenge is one directory under <code>library/challenges/&lt;id&gt;/</code>
+          containing a <code>challenge.json</code> manifest valid against{" "}
+          <code>library/schemas/challenge-v1.schema.json</code> and the standalone
+          prompt file it references.
+        </p>
+        <p>
+          Requirements validation enforces: a stable slug matching the directory,
+          semver version, correct prompt SHA-256, provenance with licensing
+          (external entries must link an HTTPS source and state license status
+          explicitly — link, never copy), capability profile, budget, at least one
+          verification criterion with required evidence kinds, expected artifacts,
+          and the fixed one-shot policy. Core challenges stay in draft until a
+          public evaluator is checked in and hash-locked, originality is reviewed,
+          and two independent calibration runs establish that the task is viable.
+        </p>
+        <p>
+          Original prompts should be written to be executable without follow-up:
+          concrete rules, explicit scope, acceptance tests, and priorities — the
+          same standard the authoring skill applies.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="run-sub-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">02</span>
+        <h2 id="run-sub-heading">Submitting a run result</h2>
+      </div>
+      <div class="prose">
+        <p>
+          A result is one directory under <code>library/results/&lt;result-id&gt;/</code>
+          with a <code>result.json</code> manifest plus artifacts and evidence
+          files. Validation mechanically rejects:
+        </p>
+        <p>
+          references to unknown challenges or versions, stale prompt hashes,
+          passing claims without evidence, artifact hashes that don't match bytes
+          on disk, missing evidence files, insecure links, unsafe paths, and
+          incomplete executor identity. Every run declares either the
+          <code>raw-completion</code> or <code>agentic-self-review</code> lane;
+          results from those lanes are never ranked together. A <em>verified</em>
+          status additionally requires reproduction evidence and is granted by
+          maintainers, not self-declared.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Before you submit</span>
+          <p>
+            Run <code>python3 scripts/validate_library.py</code>. If your result
+            claims success without evidence attached, the validator — not a
+            maintainer — will be the first to reject it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="safety-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">03</span>
+        <h2 id="safety-heading">Safe submissions</h2>
+      </div>
+      <div class="prose">
+        <p>
+          Submitted artifacts are untrusted input. Do not include executables,
+          archives, dependencies, or anything requiring installation; playable
+          results are single static HTML files at most, and they are never
+          auto-executed by this site. Prompts must not contain instructions
+          targeting agents that render the site content. See{" "}
+          <a href="https://github.com/5p00kyy/oneshot/blob/main/SECURITY.md">SECURITY.md</a>{" "}
+          for reporting concerns privately.
+        </p>
+        <p>
+          Local checks for a full contribution:
+        </p>
+        <pre style="border: 1px solid var(--rule); padding: 1rem; overflow-x: auto; font-size: 0.85rem;"><code>python3 scripts/validate_repo.py
+python3 -m unittest discover -s tests -p "test_*.py"
+cd site &amp;&amp; npm ci &amp;&amp; npm run build &amp;&amp; npm run verify:dist</code></pre>
+      </div>
+    </div>
+  </section>
+</Base>

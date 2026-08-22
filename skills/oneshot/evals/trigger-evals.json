@@ -75,6 +75,16 @@
       "prompt": "Make this one-shot less repetitive but keep every important requirement.",
       "should_trigger": true,
       "reason": "Explicit refinement of an established one-shot prompt."
+    },
+    {
+      "prompt": "Write a one-sentence prompt for an image model to generate an SVG of a pelican riding a bicycle.",
+      "should_trigger": true,
+      "reason": "A narrow prompt-authoring request still belongs to OneShot and should remain Brief/R0."
+    },
+    {
+      "prompt": "Generate an SVG of a pelican riding a bicycle.",
+      "should_trigger": false,
+      "reason": "The user wants the artifact itself, not a reusable prompt for another executor."
     }
   ]
 }

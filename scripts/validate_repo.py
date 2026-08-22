@@ -16,6 +16,11 @@ from types import ModuleType
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / "skills" / "oneshot"
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+PRIVATE_MACHINE_PATH_RE = re.compile(
+    r"(?:/" + "root" + r"/|/" + "home" + r"/[^/\s]+/|/" + "Users" + r"/[^/\s]+/|"
+    r"[A-Za-z]:\\+(?:" + "Users" + r"|Documents and Settings)\\+[^\\\r\n]+\\+)",
+    re.IGNORECASE,
+)
 JUNK_NAMES = {"__pycache__", ".DS_Store", "Thumbs.db"}
 JUNK_SUFFIXES = {".pyc", ".pyo"}
 REQUIRED_ROOT_FILES = {
@@ -41,8 +46,20 @@ REQUIRED_ROOT_FILES = {
     "install.sh",
     "scripts/install_skill.py",
     "scripts/package_release.py",
+    "scripts/validate_library.py",
     "scripts/validate_repo.py",
     "tests/test_repository.py",
+    "tests/test_library.py",
+    "docs/one-shot-definition.md",
+    "library/README.md",
+    "library/maintainers.json",
+    "library/schemas/challenge-v1.schema.json",
+    "library/schemas/result-v1.schema.json",
+    "library/schemas/result-v2.schema.json",
+    "library/challenges/loopback/challenge.json",
+    "site/package.json",
+    "site/package-lock.json",
+    ".github/workflows/site-build.yml",
 }
 FORBIDDEN_ROOT_FILES = {"OPENCODE_HANDOFF.md", "START_HERE.md"}
 
@@ -103,9 +120,27 @@ def validate_no_junk() -> None:
                     fail(f"Generated junk is tracked by Git: {path}")
 
 
+def validate_public_hygiene() -> None:
+    excluded_parts = {".git", "dist", "node_modules", "__pycache__"}
+    text_suffixes = {
+        ".astro", ".css", ".html", ".js", ".json", ".jsonl", ".log",
+        ".md", ".mjs", ".py", ".sh", ".svg", ".toml", ".ts", ".txt",
+        ".yaml", ".yml",
+    }
+    for source in sorted(ROOT.rglob("*")):
+        if not source.is_file() or excluded_parts.intersection(source.parts):
+            continue
+        if source.suffix.lower() not in text_suffixes:
+            continue
+        text = source.read_text(encoding="utf-8", errors="replace")
+        if PRIVATE_MACHINE_PATH_RE.search(text):
+            fail(f"Private machine path is present in public text: {source.relative_to(ROOT)}")
+
+
 def validate_links() -> None:
+    excluded_parts = {".git", "dist", "node_modules"}
     for source in sorted(ROOT.rglob("*.md")):
-        if ".git" in source.parts or "dist" in source.parts:
+        if excluded_parts.intersection(source.parts):
             continue
         text = source.read_text(encoding="utf-8")
         for target in LINK_RE.findall(text):
@@ -256,6 +291,7 @@ def validate_deterministic_package(version: str) -> None:
 def main() -> None:
     validate_required_files()
     validate_no_junk()
+    validate_public_hygiene()
     validate_links()
     version = validate_license_and_version()
     validate_workflows()
@@ -264,11 +300,15 @@ def main() -> None:
     result = run([sys.executable, str(SKILL_DIR / "scripts" / "validate_skill.py")])
     print(result.stdout, end="")
 
+    result = run([sys.executable, str(ROOT / "scripts" / "validate_library.py")])
+    print(result.stdout, end="")
+
     validate_deterministic_package(version)
 
     print("OK: public repository is valid")
     print(f"Version: {version}")
     print("Skill path: skills/oneshot/SKILL.md")
+    print("Challenge library: valid")
     print("Release package: deterministic")
 
 

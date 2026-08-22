@@ -1,0 +1,208 @@
+---
+import Base from "../layouts/base.astro";
+---
+
+<Base
+  title="Methodology"
+  description="The one-shot definition, run classes, verification tiers, and the untrusted-artifact policy behind OneShot results."
+  active="methodology"
+>
+  <section class="hero hero-page">
+    <div class="container">
+      <div class="hero-strip" aria-hidden="true">
+        <span>OS / METHOD-03</span>
+        <span>FIXED DEFINITIONS</span>
+        <span>REV. 01</span>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-statement">
+          <p class="hero-overline">Judging protocol</p>
+          <h1>Definitions <em>over vibes.</em></h1>
+        </div>
+        <p class="lede">
+          The lab is an evidence-backed field guide to autonomous work: playable systems are a flagship family alongside builds, precision work, repair, and edge-case probes. Its only special power is restraint: a fixed meaning of one-shot,
+          hashed prompts, explicit evidence requirements, and a refusal to display
+          what cannot be substantiated.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="one-shot-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">01</span>
+        <h2 id="one-shot-heading">What "one shot" means</h2>
+      </div>
+      <div class="prose">
+        <p>
+          A one-shot run is a single execution attempt driven by
+          <strong>one initial brief</strong> with <strong>no human follow-up</strong>:
+          no answered questions, no extra hints, no corrections, and no manual
+          fixes between the start of the run and the executor's final handoff.
+        </p>
+        <p>
+          "One shot" constrains human involvement, not machine effort. Within the
+          single run an executor may read files, consult documentation, use tools
+          and subagents, run and observe its own artifact, test, find defects,
+          repair, and iterate internally — as much as it likes.
+        </p>
+        <p>A run stops being one-shot if a human answers a mid-run question, edits the prompt after execution started, touches up the artifact afterward, or stitches multiple runs together by hand.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="complexity-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">02</span>
+        <h2 id="complexity-heading">Compact core, separate showcase</h2>
+      </div>
+      <div class="prose" style="max-width: none;">
+        <p>
+          The comparative core uses T0 atom, T1 compact, and T2 bounded tasks.
+          T3 showcase challenges are richer stress tests on a separate board. A
+          full browser game cannot be ranked honestly beside an eight-word SVG
+          prompt merely because both started from one brief.
+        </p>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th scope="col">Tier</th><th scope="col">Purpose</th><th scope="col">Typical budget</th></tr></thead>
+            <tbody>
+              <tr><td>T0 atom</td><td>One directly observable capability</td><td>5-15 minutes, one deliverable</td></tr>
+              <tr><td>T1 compact</td><td>One useful artifact, microgame, or narrow repair</td><td>20-30 minutes, one or two deliverables</td></tr>
+              <tr><td>T2 bounded</td><td>Small multi-state workflow or fixture-backed repair</td><td>45-60 minutes, up to four deliverables</td></tr>
+              <tr><td>T3 showcase</td><td>Rich vertical slice or sustained autonomous build</td><td>90-180 minutes, separate board</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Prompt depth is recorded separately as brief, benchmark, or extensive. A rigorous evaluator does not require an oversized contestant prompt.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="lanes-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">03</span>
+        <h2 id="lanes-heading">Do not mix run lanes</h2>
+      </div>
+      <div class="prose">
+        <p>
+          <strong>Raw completion</strong> is one frozen prompt and one generation,
+          with no visual feedback, repair prompt, retry, or human edit.
+          <strong>Agentic self-review</strong> still uses one frozen prompt and no
+          human follow-up, but the executor may run, inspect, test, and repair its
+          work inside a fixed tool and time budget.
+        </p>
+        <p>These measure different systems. Results are comparable only inside the same lane, model identity, tool profile, and output envelope.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="verification-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">04</span>
+        <h2 id="verification-heading">Verification tiers</h2>
+      </div>
+      <div class="prose" style="max-width: none;">
+        <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Tier</th>
+              <th scope="col">Meaning</th>
+              <th scope="col">Requirement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge quiet">unverified</span></td>
+              <td>The submitter claims the checks passed.</td>
+              <td>Evidence attached for every passing claim; artifacts and checked-in evidence hash-verified.</td>
+            </tr>
+            <tr>
+              <td><span class="badge accent">verified</span></td>
+              <td>A listed maintainer attestation records that the claim was reviewed or reproduced.</td>
+              <td>Every criterion passes with required evidence, required artifacts are present and hashed, and a review attestation is recorded.</td>
+            </tr>
+            <tr>
+              <td><span class="badge quiet">disputed</span></td>
+              <td>Review found problems with the claim or evidence.</td>
+              <td>Kept public with the dispute noted; never silently deleted.</td>
+            </tr>
+            <tr>
+              <td><span class="badge quiet">withdrawn</span></td>
+              <td>The submitter retracted the result.</td>
+              <td>Manifest retained; claim marked withdrawn.</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="untrusted-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">05</span>
+        <h2 id="untrusted-heading">Untrusted artifacts &amp; sandbox policy</h2>
+      </div>
+      <div class="prose">
+        <p>
+          Result artifacts — playable HTML, SVGs, logs — begin as untrusted input.
+          Repository review can make them eligible for display, but does not make
+          their code safe. Concretely:
+        </p>
+        <p>
+          Submitted artifacts never execute automatically or with the site's origin.
+          The gallery is fully static and renders only records accepted into the
+          repository, not live submissions. Accepted HTML starts only after an explicit
+          click inside an opaque-origin iframe whose sole sandbox grant is scripts. A
+          restrictive document policy blocks data connections, external resources,
+          forms, popups, downloads, and top-level navigation, and no privileged parent bridge is
+          exposed. SVG is treated as code because it can carry script, so checked-in SVG
+          previews are loaded only as static images, never inserted as inline document markup.
+        </p>
+        <div class="callout">
+          <span class="callout-title">Interactive, not trusted</span>
+          <p>
+            The sandbox makes accepted games playable on their result pages without granting them site privileges. It is a constrained demonstration, not verification evidence or a safety certificate. Exact checked-in bytes remain available for inspection, while result claims still come from preserved evaluator-controlled evidence.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="repro-heading">
+    <div class="container">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">06</span>
+        <h2 id="repro-heading">Reproducibility</h2>
+      </div>
+      <div class="prose">
+        <p>
+          Every result declares one of four statuses:
+          <strong>reproducible</strong> (independent reruns reproduced the claim),
+          <strong>partially-reproducible</strong> (core outcome reproduced with
+          documented variance), <strong>not-reproducible</strong>, or
+          <strong>untested</strong>. Only reproducible or partially-reproducible
+          results can reach <em>verified</em> status, and validation enforces this
+          mechanically rather than on the honor system.
+        </p>
+        <p>
+          Model drift is expected: model versions and snapshots are recorded per
+          run, and identical outputs are never promised across time — only honest
+          attempts under the same frozen brief.
+        </p>
+        <p>
+          A maintainer ID in a result is an allowlisted identity label and shape
+          check, not cryptographic proof of who typed the file. Repository
+          authorship and code review remain the authentication boundary.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

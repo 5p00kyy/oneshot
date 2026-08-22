@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Mechanical audit for one-shot prompts.
+"""Profile-aware mechanical audit for OneShot prompts.
 
-This script catches common structural omissions and prompt smells. It does not
-replace semantic review with the quality rubric.
+The audit catches common omissions and prompt smells. It does not replace the
+profile quality gate or semantic review.
 """
 
 from __future__ import annotations
@@ -43,6 +43,19 @@ CHAIN_OF_THOUGHT_PATTERNS: tuple[str, ...] = (
     r"write out (?:your )?internal reasoning",
 )
 
+# Evaluation mechanics belong in the challenge manifest or evaluator, never in
+# a Brief/Benchmark contestant prompt. Patterns intentionally target mechanics,
+# not artifact behavior such as an in-game score.
+EVALUATOR_LEAK_PATTERNS: tuple[tuple[str, str], ...] = (
+    (r"\b(?:scoring|grading) (?:weights?|criteria|rubric|system|procedure)\b", "scoring mechanics"),
+    (r"\b(?:points? (?:are )?awarded|weighted score|score weighting|evaluation score)\b", "scoring mechanics"),
+    (r"\b(?:evaluator|judge model|adjudicator) (?:will|must|should|checks?|sees?|uses?|internals?)\b", "evaluator internals"),
+    (r"\bhidden (?:tests?|cases?|fixtures?|checks?)\b", "hidden cases"),
+    (r"\b(?:evaluation|benchmark|grading|test) harness\b", "harness procedure"),
+    (r"\b(?:run|invoke|call) (?:the )?harness\b", "harness procedure"),
+    (r"\b(?:retry policy|retry budget|retries allowed|allowed retries|attempts allowed)\b", "retry policy"),
+)
+
 VAGUE_TERMS: tuple[str, ...] = (
     "production-ready",
     "high quality",
@@ -59,8 +72,7 @@ VAGUE_TERMS: tuple[str, ...] = (
 
 def normalize_line(line: str) -> str:
     line = re.sub(r"[`*_>#-]", " ", line.lower())
-    line = re.sub(r"\s+", " ", line).strip()
-    return line
+    return re.sub(r"\s+", " ", line).strip()
 
 
 def count_matches(text: str, patterns: tuple[str, ...]) -> int:
@@ -68,8 +80,14 @@ def count_matches(text: str, patterns: tuple[str, ...]) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Audit a one-shot prompt for common structural defects.")
+    parser = argparse.ArgumentParser(description="Audit a one-shot prompt using a calibrated profile.")
     parser.add_argument("prompt", type=Path, help="Path to a Markdown or text prompt")
+    parser.add_argument(
+        "--profile",
+        choices=("brief", "benchmark", "extensive"),
+        default="extensive",
+        help="Prompt-depth profile (default: extensive for backward compatibility)",
+    )
     parser.add_argument("--strict", action="store_true", help="Treat warnings as a failing exit status")
     args = parser.parse_args()
 
@@ -86,17 +104,22 @@ def main() -> int:
     warnings: list[str] = []
     notes: list[str] = []
 
-    if len(words) < 250:
-        notes.append("Prompt is under 250 words; verify that the task is genuinely narrow.")
-    elif len(words) > 12_000:
-        warnings.append("Prompt exceeds 12,000 words; perform an aggressive deduplication and salience review.")
-
-    if len(headings) < 4:
-        warnings.append("Fewer than four Markdown headings detected; complex prompts may be hard to navigate.")
-
-    for category, patterns in CATEGORY_PATTERNS.items():
-        if count_matches(lower, patterns) == 0:
-            errors.append(f"Missing structural signal for {category}.")
+    if args.profile == "brief":
+        if len(words) > 120:
+            warnings.append("Brief exceeds the default 120-word envelope; compress it or justify the extra detail.")
+    elif args.profile == "benchmark":
+        if len(words) > 700:
+            errors.append("Benchmark exceeds the 700-word cap.")
+    else:
+        if len(words) < 250:
+            notes.append("Extensive prompt is under 250 words; verify that Extensive is the right profile.")
+        elif len(words) > 12_000:
+            warnings.append("Prompt exceeds 12,000 words; perform an aggressive deduplication and salience review.")
+        if len(headings) < 4:
+            warnings.append("Fewer than four Markdown headings detected; an Extensive prompt may be hard to navigate.")
+        for category, patterns in CATEGORY_PATTERNS.items():
+            if count_matches(lower, patterns) == 0:
+                errors.append(f"Missing structural signal for {category}.")
 
     for pattern, label in PLACEHOLDER_PATTERNS:
         matches = re.findall(pattern, text, re.IGNORECASE)
@@ -108,6 +131,14 @@ def main() -> int:
             errors.append("Prompt requests exposed chain of thought; require observable evidence instead.")
             break
 
+    if args.profile in {"brief", "benchmark"}:
+        leaked: list[str] = []
+        for pattern, label in EVALUATOR_LEAK_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                leaked.append(label)
+        for label in dict.fromkeys(leaked):
+            errors.append(f"Contestant prompt leaks {label}; move it to the manifest or evaluator.")
+
     normalized_lines = [normalize_line(line) for line in text.splitlines()]
     repeated = Counter(
         line for line in normalized_lines
@@ -117,7 +148,7 @@ def main() -> int:
     if duplicates:
         warnings.append(
             "Repeated directive-like lines detected: "
-            + "; ".join(f"{count}× '{line[:90]}'" for line, count in duplicates[:5])
+            + "; ".join(f"{count}x '{line[:90]}'" for line, count in duplicates[:5])
         )
 
     vague_count = sum(lower.count(term) for term in VAGUE_TERMS)
@@ -137,18 +168,13 @@ def main() -> int:
     if re.search(r"\b(?:ask no questions|do not ask (?:a )?question)\b", lower) and "confirmation" not in lower:
         warnings.append("The prompt forbids all questions but defines no confirmation boundary for destructive or external actions.")
 
-    if "actually" not in lower and "verification" in lower:
-        notes.append("Consider requiring verification that was actually executed, not only planned.")
-
-    if "placeholder" not in lower and not any(re.search(p, text, re.IGNORECASE) for p, _ in PLACEHOLDER_PATTERNS):
+    if "placeholder" not in lower and not any(re.search(pattern, text, re.IGNORECASE) for pattern, _ in PLACEHOLDER_PATTERNS):
         notes.append("No obvious unresolved placeholders detected.")
 
-    score = 100
-    score -= 12 * len(errors)
-    score -= 4 * len(warnings)
-    score = max(0, score)
+    score = max(0, 100 - 12 * len(errors) - 4 * len(warnings))
 
     print(f"Prompt: {args.prompt}")
+    print(f"Profile: {args.profile}")
     print(f"Words: {len(words):,}")
     print(f"Headings: {len(headings)}")
     print(f"Mechanical score: {score}/100")
@@ -157,19 +183,16 @@ def main() -> int:
         print("\nERRORS")
         for item in errors:
             print(f"- {item}")
-
     if warnings:
         print("\nWARNINGS")
         for item in warnings:
             print(f"- {item}")
-
     if notes:
         print("\nNOTES")
         for item in notes:
             print(f"- {item}")
-
     if not errors and not warnings:
-        print("\nNo mechanical defects detected. Complete the semantic quality-rubric review.")
+        print("\nNo mechanical defects detected. Complete the profile's semantic quality gate.")
 
     if errors or (args.strict and warnings):
         return 1

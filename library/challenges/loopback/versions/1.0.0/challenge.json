@@ -1,0 +1,133 @@
+{
+  "schema": "oneshot.challenge/v1",
+  "id": "loopback",
+  "version": "1.0.0",
+  "title": "Loopback \u2014 rotation circuit puzzle",
+  "category": "playable-browser-game",
+  "status": "draft",
+  "origin": "original",
+  "summary": "Build Loopback, a complete single-file browser puzzle game: rotate wire tiles to power every lamp across twelve verified-solvable levels, with sequential unlocking, best-score persistence, full keyboard play, and an editorial-lab visual identity. Deterministic rules make runs comparable.",
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "12f340fc380ae0c85eb5ed6fbebe90ebb10dfb82c0c93664fd1c666ba3f4d3a4"
+  },
+  "provenance": {
+    "license": {
+      "spdx": "MIT",
+      "label": "MIT (this repository)",
+      "url": "https://github.com/5p00kyy/oneshot/blob/main/LICENSE"
+    },
+    "attribution": "Challenge authored for the OneShot library.",
+    "notes": "Draft challenge authored for OneShot. Its circuit-rotation loop is genre-established and its title has a public collision; it remains closed pending naming and final originality review. The existing disputed result preserves the exact prompt and evidence it executed."
+  },
+  "capabilities": {
+    "environment": "Autonomous coding agent with file and shell access; artifact must run offline from file:// in current Chrome, Firefox, Edge, or Safari.",
+    "tools": [
+      "file-read-write",
+      "shell",
+      "browser-or-dom-testing"
+    ],
+    "skills": [
+      "html5",
+      "css",
+      "vanilla-javascript",
+      "svg",
+      "accessibility",
+      "puzzle-design"
+    ],
+    "constraints": [
+      "Single self-contained index.html; no build step, framework, or external asset required to play.",
+      "No network requests at runtime.",
+      "At most three output files."
+    ]
+  },
+  "execution_lane": "browser-static-single-file",
+  "budget": {
+    "wall_clock_minutes": 120,
+    "output_files_max": 3,
+    "network_access": "docs-only",
+    "notes": "Generous single-run budget; internal testing and level-solvability scripting are expected within the one brief."
+  },
+  "verification": [
+    {
+      "id": "boot-offline",
+      "method": "automated-script",
+      "description": "index.html opens via file:// with zero console errors and no external URLs in source.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "core-loop",
+      "method": "interactive-check",
+      "description": "Rotating tiles changes connectivity; lamps light exactly when connected; completion requires all lamps lit.",
+      "evidence_required": [
+        "transcript",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "levels-solvable",
+      "method": "automated-script",
+      "description": "All twelve levels were solved at or below par by the executor, with per-level move counts recorded.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "persistence-recovery",
+      "method": "manual-browser",
+      "description": "Best scores survive reload; corrupted localStorage falls back to a fresh profile without errors.",
+      "evidence_required": [
+        "screenshot"
+      ]
+    },
+    {
+      "id": "keyboard-complete",
+      "method": "interactive-check",
+      "description": "Levels 1 through 3 are completable using only the keyboard.",
+      "evidence_required": [
+        "transcript"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "index.html",
+      "kind": "html",
+      "required": true,
+      "description": "The complete self-contained game."
+    },
+    {
+      "path": "README.md",
+      "kind": "markdown",
+      "required": true,
+      "description": "Run instructions, rules summary, assumptions, and honest verification record."
+    },
+    {
+      "path": "verification.log",
+      "kind": "log",
+      "required": false,
+      "description": "Optional solvability/DOM test output."
+    }
+  ],
+  "one_shot_policy": {
+    "human_follow_up": false,
+    "internal_iteration": true,
+    "notes": "One initial brief; executors are expected to test, verify solvability, and repair defects within the same run."
+  },
+  "family": "playable",
+  "tier": "showcase",
+  "prompt_profile": "extensive",
+  "benchmark_question": "Can an agent deliver a deterministic, keyboard-complete puzzle loop with reliable progression and recovery in one offline HTML file?",
+  "capability_dimensions": [
+    "planning",
+    "implementation",
+    "interaction-design",
+    "state-management",
+    "verification",
+    "accessibility",
+    "offline-delivery"
+  ]
+}

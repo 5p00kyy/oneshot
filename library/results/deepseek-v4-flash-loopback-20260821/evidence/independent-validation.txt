@@ -1,0 +1,11 @@
+Independent black-box validation (2026-08-21)
+Target: file://<run-root>/index.html
+
+Provider identity: ~/.local/share/opencode/opencode.db session ses_fddca9eacffeH9ZCRzDsSFynag => providerID openrouter, model id deepseek/deepseek-v4-flash-0731, agent build, version 1.18.1. evidence/run.log lines 23-24 and 701-702 corroborate identity and clean exit.
+Exit/runtime: evidence/exit-code.txt=0; evidence/runtime-ms.txt=2363053.
+Artifact: work/index.html only published candidate; SHA-256 ba0f765cee16aa03d56f84ba401a2f21a5621011b112e5f1dda69df42e22c623.
+Offline: Chromium file:// request log only document URL; static scan found no http(s), fetch, XHR, WebSocket, EventSource, @import or url() tokens.
+
+Black-box findings: pointer rotation increments move counter; keyboard ArrowRight moves focus box, Enter rotates (0 -> 1 move), U undo restores 0; locked level buttons remain at level 1. Buttons have names; board role=img/aria-label; aria-live polite region exists; viewport meta present; no console/page errors observed. Desktop 1440x1000 and mobile 390x844 (DPR2) screenshots captured under <validation-workspace>/; fit/no overlap, but desktop content is small and pale borders/edge path rendering are weak.
+
+Critical reproduction: fresh file:// Chromium context, cleared localStorage, entered Level 1. Exhaustive ordered 2-pointer-click search over all 9 occupied tile coordinates (81 sequences), checking non-hidden completion overlay and lamp state, found no win; 500 random fresh-reset walks of 20 clicks also found no win. Thus Level 1 does not reproduce the claimed par=2 solvability/win transition. Persistence best/unlock could not be validated because no level could be completed; no localStorage keys were written after a non-winning move. The model's work/verification.log and evidence self-report claim all 12 pass, but independent runtime behavior contradicts that claim.

@@ -1,0 +1,135 @@
+{
+  "schema": "oneshot.result/v2",
+  "id": "qwen3-8-27b-nvfp4-gravshift-20260821",
+  "challenge": {
+    "id": "gravshift",
+    "version": "1.0.0"
+  },
+  "run_class": "canonical",
+  "run_lane": "agentic-self-review",
+  "executed_at": "2026-08-21",
+  "executor": {
+    "model": {
+      "name": "Qwen3.8 27B NVFP4",
+      "version": "3.8-27B NVFP4",
+      "snapshot_id": "vllm/qwen3.8-27b-nvfp4"
+    },
+    "agent": {
+      "name": "OpenCode",
+      "version": "1.18.18",
+      "profile": "build"
+    },
+    "host": {
+      "name": "OpenClaw local benchmark runner",
+      "version": "Linux 6.8.12-20-pve x86_64"
+    },
+    "identity_notes": "Direct local OpenCode run. The run log records providerID=vllm and modelID=qwen3.8-27b-nvfp4 with a 122,880-token configured context. The only model step reached OpenCode\u2019s generation cap before any tool call or handoff."
+  },
+  "status": "disputed",
+  "claim": {
+    "passed": false,
+    "summary": "The attempt produced no challenge artifact. Its only model step reached OpenCode\u2019s 32,000-token generation cap without a tool call or final handoff, leaving both required files absent; no gameplay, offline boot, deterministic rooms, or visual criteria could be exercised.",
+    "completed_at": "2026-08-21"
+  },
+  "criterion_outcomes": [
+    {
+      "id": "offline-boot",
+      "passed": false,
+      "evidence_refs": [
+        "validation-log",
+        "missing-artifact-screenshot"
+      ],
+      "notes": "No index.html was produced. Chromium returned ERR_FILE_NOT_FOUND for the expected file URL, so offline boot and zero-console-error behavior could not pass."
+    },
+    {
+      "id": "gravity-platform-loop",
+      "passed": false,
+      "evidence_refs": [
+        "opencode-transcript",
+        "missing-artifact-screenshot"
+      ],
+      "notes": "The structured run contains no tool calls and the work directory contains no playable artifact, so movement, jumping, gravity flips, pause, death, checkpoint recovery, and restart are absent."
+    },
+    {
+      "id": "deterministic-rooms",
+      "passed": false,
+      "evidence_refs": [
+        "validation-log"
+      ],
+      "notes": "No game files, rooms, goals, checkpoints, gravity-dependent obstacles, or read-only snapshot implementation were produced."
+    },
+    {
+      "id": "visual-readability",
+      "passed": false,
+      "evidence_refs": [
+        "missing-artifact-screenshot"
+      ],
+      "notes": "No game view exists to review; the retained browser screenshot records the missing-file error rather than an artifact render."
+    }
+  ],
+  "artifacts": [],
+  "evidence": [
+    {
+      "id": "opencode-transcript",
+      "kind": "transcript",
+      "location": "evidence/opencode-events.jsonl",
+      "description": "Path-redacted structured OpenCode event stream showing one step ending for length with no tool or handoff events.",
+      "sha256": "244c022c492e8fc3a404d34456b3408f1d3a648c9366b5410dbd3e4d8aefd64f"
+    },
+    {
+      "id": "opencode-log",
+      "kind": "log",
+      "location": "evidence/opencode-run.log",
+      "description": "Path-redacted OpenCode execution log recording the local model route and normal process shutdown.",
+      "sha256": "226b01e2bd7ade81a508993206022ee3aa209b4cbe81cdb05d46f4bf8ca3ad6f"
+    },
+    {
+      "id": "model-identity",
+      "kind": "log",
+      "location": "evidence/model-identity.json",
+      "description": "Evaluator-produced identity and terminal-state summary tying the run to the local Qwen route and preserved 122,880-token context.",
+      "sha256": "a898d12c2536d228f6341b6b04a825765a34b454244a3495b40b269043e201d2"
+    },
+    {
+      "id": "validation-log",
+      "kind": "log",
+      "location": "evidence/validation.log",
+      "description": "Independent prompt, event, work-directory, required-artifact, and criterion inspection.",
+      "sha256": "84ba6e58dbc8430275fcd3929e2d68b574ee9fe7d0f5648b759509d997f55ea2"
+    },
+    {
+      "id": "missing-artifact-screenshot",
+      "kind": "screenshot",
+      "location": "evidence/no-artifact.png",
+      "description": "Chromium screenshot from opening the expected file URL, which returned ERR_FILE_NOT_FOUND because no index.html was produced.",
+      "sha256": "22ebf080b2f41837910996a81a86bac40dd8ea096684869186260878e76a0241"
+    },
+    {
+      "id": "artifact-checksums",
+      "kind": "checksum-file",
+      "location": "evidence/SHA256SUMS.txt",
+      "description": "SHA-256 checksums for every retained evidence file except this checksum file itself.",
+      "sha256": "6f052330678b2fd7729a3ce11db8abefd9dc606e9c393d8ff566b26dae9321e5"
+    },
+    {
+      "id": "reproduction-notes",
+      "kind": "reproduction-script",
+      "location": "evidence/reproduce.md",
+      "description": "Exact route, one-shot procedure, terminal condition, and independent absence checks.",
+      "sha256": "91c7c92393171619e08c2d0643ae21b44bb71ad5395842e0d1bfeab65218d66e"
+    }
+  ],
+  "reproducibility": {
+    "status": "not-reproducible",
+    "instructions_path": "evidence/reproduce.md",
+    "notes": "The absence of required output and terminal length condition are reproducible from the preserved record. There is no artifact or success claim to reproduce; the stochastic generative attempt was not rerun or continued."
+  },
+  "budget_actual": {
+    "wall_clock_minutes": 11,
+    "output_files": 0,
+    "notes": "The OpenCode process exited 0 after 661,018 ms, but its sole model step ended for length at 32,000 output tokens. No tool call, final handoff, index.html, or README.md was emitted."
+  },
+  "prompt_echo": {
+    "sha256": "481dd6b7f94d87fb1131c2fe2317b9dd27a9aab99cf170ba2a191032728d7c46"
+  }
+}

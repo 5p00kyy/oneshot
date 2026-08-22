@@ -7,6 +7,12 @@ __pycache__/
 
 # Generated release artifacts
 dist/
+site/dist/
+
+# Site dependencies and local screenshots
+site/node_modules/
+site/.astro/
+.screenshots/
 
 # Agent-local installations and sessions
 .opencode/skills/

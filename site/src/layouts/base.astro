@@ -1,0 +1,65 @@
+---
+import "../styles/global.css";
+import { withBase } from "../lib/library";
+
+interface Props {
+  title: string;
+  description: string;
+  active?: "home" | "challenges" | "results" | "methodology" | "contribute";
+}
+
+const { title, description, active } = Astro.props;
+const fullTitle = title === "OneShot" ? "OneShot — one brief, no follow-up" : `${title} — OneShot`;
+
+const navItems = [
+  { key: "challenges", label: "Challenges", href: "/challenges/" },
+  { key: "results", label: "Results", href: "/results/" },
+  { key: "methodology", label: "Methodology", href: "/methodology/" },
+  { key: "contribute", label: "Contribute", href: "/contribute/" },
+] as const;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f5f2eb" />
+    <title>{fullTitle}</title>
+    <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container masthead">
+        <a class="wordmark" href={withBase("/")} aria-label="OneShot home">
+          <span class="wordmark-mark" aria-hidden="true"></span><span>ONESHOT</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          {
+            navItems.map((item) => (
+              <a
+                href={withBase(item.href)}
+                aria-current={active === item.key ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <p class="footer-mark"><span class="wordmark-mark" aria-hidden="true"></span>ONESHOT</p>
+        <p>One brief. No follow-up. Evidence or it didn’t happen.</p>
+        <p><a href="https://github.com/5p00kyy/oneshot">Source &amp; records ↗</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
