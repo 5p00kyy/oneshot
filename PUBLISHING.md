@@ -75,8 +75,9 @@ The `Release` workflow then:
 2. validates the repository and version/tag match.
 3. Runs the tests and builds the deterministic package.
 4. Transfers the package to a separate publication job.
-5. Fails if the tag already has a GitHub release.
-6. Creates one release with the ZIP and checksum assets.
+5. Extracts the matching curated version section from `CHANGELOG.md` for the release body.
+6. Fails if the tag already has a GitHub release.
+7. Creates one release with the ZIP and checksum assets.
 
 GitHub's immutable-release setting and the `v*` tag ruleset provide the remote enforcement behind this workflow contract.
 
