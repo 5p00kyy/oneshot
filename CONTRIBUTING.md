@@ -32,6 +32,24 @@ python3 -m unittest discover -s tests -p "test_*.py"
 
 Use `python` instead of `python3` where required.
 
+## Commit and release discipline
+
+Plan commit boundaries before staging substantial work. A release may contain many
+commits; the release itself is not a sensible commit boundary.
+
+- Keep each commit to one coherent, reviewable concern and leave the repository
+  valid whenever practical.
+- Separate contracts and schemas, validators, challenge or result data, site UI,
+  skill behavior, and release automation when they can be reviewed independently.
+- Do not squash distinct implementation layers into one commit merely because
+  they ship in the same version.
+- Add an informative entry under `CHANGELOG.md`'s `Unreleased` section for every
+  user-visible change. Pull-request summaries and generated contributor lists do
+  not replace the changelog.
+- Before tagging, promote the curated entries into the dated version section.
+  The release workflow publishes that exact section and fails if it is missing
+  or empty.
+
 Create a release package locally with:
 
 ```bash

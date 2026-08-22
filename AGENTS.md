@@ -78,6 +78,11 @@ Use `python` instead of `python3` on platforms where required.
 
 ## Change expectations
 
+For substantial work, follow the commit and release discipline in
+`CONTRIBUTING.md`. Define reviewable commit boundaries before staging; do not
+collapse independently reviewable layers into one commit just because they ship
+in the same release.
+
 When changing activation language:
 
 - Add or update trigger cases in `skills/oneshot/evals/trigger-evals.json`.
