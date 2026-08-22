@@ -45,7 +45,7 @@ import Base from "../layouts/base.astro";
           "One shot" constrains human involvement, not machine effort. Within the
           single run an executor may read files, consult documentation, use tools
           and subagents, run and observe its own artifact, test, find defects,
-          repair, and iterate internally — as much as it likes.
+          repair, and iterate internally as much as it likes.
         </p>
         <p>A run stops being one-shot if a human answers a mid-run question, edits the prompt after execution started, touches up the artifact afterward, or stitches multiple runs together by hand.</p>
       </div>
@@ -152,7 +152,7 @@ import Base from "../layouts/base.astro";
       </div>
       <div class="prose">
         <p>
-          Result artifacts — playable HTML, SVGs, logs — begin as untrusted input.
+          Result artifacts, including playable HTML, SVGs, and logs, begin as untrusted input.
           Repository review can make them eligible for display, but does not make
           their code safe. Concretely:
         </p>
@@ -194,7 +194,7 @@ import Base from "../layouts/base.astro";
         </p>
         <p>
           Model drift is expected: model versions and snapshots are recorded per
-          run, and identical outputs are never promised across time — only honest
+          run, and identical outputs are never promised across time. Only honest
           attempts under the same frozen brief.
         </p>
         <p>

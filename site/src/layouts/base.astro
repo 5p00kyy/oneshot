@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { title, description, active } = Astro.props;
-const fullTitle = title === "OneShot" ? "OneShot — one brief, no follow-up" : `${title} — OneShot`;
+const fullTitle = title === "OneShot" ? "OneShot | one brief, no follow-up" : `${title} | OneShot`;
 
 const navItems = [
   { key: "challenges", label: "Challenges", href: "/challenges/" },

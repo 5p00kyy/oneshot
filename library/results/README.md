@@ -1,6 +1,6 @@
 # Results
 
-This directory holds published run results — one `result.json` manifest per
+This directory holds published run results, with one `result.json` manifest per
 directory, plus that run's artifacts and evidence. It currently contains two
 disputed canonical showcase records. These are
 inspectable attempts, including a preserved zero-artifact failure, not aggregate
@@ -10,7 +10,7 @@ performance claims, and this repository does not fabricate placeholder runs.
 
 A result directory (for example `results/<result-id>/`) contains:
 
-- `result.json` — a manifest valid against
+- `result.json`: a manifest valid against
   [`../schemas/result-v2.schema.json`](../schemas/result-v2.schema.json).
 - The artifact files declared in the manifest (for example `artifact.svg` or
   `index.html`), with SHA-256 hashes recorded in the manifest.
@@ -55,16 +55,16 @@ Submitted artifacts are **untrusted input**, not endorsed software:
 
 ## Run classes
 
-- **canonical** — run by maintainers as the reference attempt for a challenge.
-- **community** — a public submission from a contributor.
-- **showcase** — a canonical or community run highlighted editorially for
+- **canonical:** run by maintainers as the reference attempt for a challenge.
+- **community:** a public submission from a contributor.
+- **showcase:** a canonical or community run highlighted editorially for
   exceptional quality; selection is a maintainer decision and says nothing
   about other runs being invalid.
 
 ## Run lanes
 
-- **raw-completion** — one frozen prompt and one generation, without tool-mediated inspection or repair.
-- **agentic-self-review** — one frozen prompt and no human follow-up, with declared tools and repair allowed inside the fixed run budget.
+- **raw-completion:** one frozen prompt and one generation, without tool-mediated inspection or repair.
+- **agentic-self-review:** one frozen prompt and no human follow-up, with declared tools and repair allowed inside the fixed run budget.
 
 These measure different systems and are never ranked together.
 

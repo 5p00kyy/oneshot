@@ -76,7 +76,7 @@ New challenges are one directory under `library/challenges/<id>/` containing a
 - External entries link their source over HTTPS and state license status
   explicitly. Link upstream; never copy upstream outputs or imply ownership.
 - Every manifest declares a required benchmark `family` (`playable`, `build`, `precision`, `repair`, or `edge-case`), a concrete `benchmark_question`, and standardized `capability_dimensions`; `category` is the artifact/task subtype.
-- New categories, dimensions, or execution lanes require a schema change plus validator support — propose it in an issue first.
+- New categories, dimensions, or execution lanes require a schema change plus validator support. Propose it in an issue first.
 - New playable browser briefs should expose a documented read-only `window.__oneshotSnapshot()` returning a fresh JSON-serializable state snapshot. It may not mutate the game, expose control methods, or replace real interactive evidence.
 - A core challenge remains `draft` until its public evaluator is checked in and hash-locked, its originality review passes, and at least two independent calibration runs show that the task is viable. Active T0-T2 manifests require an `evaluator` record.
 - Keep scoring mechanics, hidden variants, retry policy, and harness implementation out of the contestant prompt. Prompt caps are 100 words for atom, 350 for compact, and 700 for bounded.
