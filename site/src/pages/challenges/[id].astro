@@ -1,0 +1,308 @@
+---
+import Base from "../../layouts/base.astro";
+import { loadChallenges, withBase } from "../../lib/library";
+
+export function getStaticPaths() {
+  return loadChallenges().map((challenge) => ({
+    params: { id: challenge.id },
+    props: { challenge },
+  }));
+}
+
+const { challenge } = Astro.props;
+const license = challenge.provenance.license;
+---
+
+<Base
+  title={challenge.title}
+  description={challenge.summary}
+  active="challenges"
+>
+  <article>
+    <header class="detail-header">
+      <div class="container">
+        <div class="detail-register" aria-hidden="true">
+          <span>OS / CHALLENGE-{challenge.index}</span>
+          <span>VERSION {challenge.version}</span>
+          <span>{challenge.status === "active" ? "PROMPT LOCKED" : "CANDIDATE · NOT OPEN"}</span>
+        </div>
+        <p class="breadcrumb">
+          <a href={withBase("/challenges/")}>Challenges</a>
+          <span aria-hidden="true"> / </span>
+          <span>{challenge.id}</span>
+        </p>
+        <p class="kicker">
+          Challenge {challenge.index} · {challenge.category}
+        </p>
+        <h1>{challenge.title}</h1>
+        <p class="summary">{challenge.summary}</p>
+        <ul class="meta-line" style="margin-bottom: 0;">
+          <li>family: {challenge.family}</li>
+          <li>tier: {challenge.tier}</li>
+          <li>prompt: {challenge.prompt_profile}</li>
+          <li>v{challenge.version}</li>
+          <li>status: {challenge.status}</li>
+          <li>origin: {challenge.origin}</li>
+          <li>lane: {challenge.execution_lane}</li>
+        </ul>
+      </div>
+    </header>
+
+    <section class="section" aria-label="Prompt">
+      <div class="container">
+        <div class="prompt-panel">
+          <div class="prompt-panel-bar">
+            <span class="label">
+              {challenge.status === "active"
+                ? "The complete brief — copy and run it as-is"
+                : "Candidate brief — visible for review, not open for published runs"}
+            </span>
+            <button class="copy-button" type="button" data-copy-target="#challenge-prompt">
+              Copy prompt
+            </button>
+          </div>
+          <pre id="challenge-prompt"><code>{challenge.promptText}</code></pre>
+        </div>
+        <p style="color: var(--ink-muted); font-size: 0.9rem;">
+          Prompt SHA-256:
+          <span class="hash" title={challenge.prompt.sha256}>{challenge.prompt.sha256.slice(0, 32)}…{challenge.prompt.sha256.slice(-8)}</span>
+          · file <code>{challenge.prompt.path}</code> · one initial brief, no human follow-up.
+          {challenge.status === "active"
+            ? " Submit only under a declared raw-completion or agentic-self-review lane."
+            : " This draft may change before activation; calibration evidence does not make it open for new runs."}
+        </p>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Specification">
+      <div class="container">
+        <div class="spec-grid">
+          <div class="spec-block">
+            <h2>Provenance &amp; licensing</h2>
+            <dl>
+              <dt>Attribution</dt>
+              <dd>{challenge.provenance.attribution}</dd>
+              <dt>License</dt>
+              <dd>
+                {license.spdx ? <span class="badge accent">{license.spdx}</span> : <span class="badge">{license.label}</span>}
+                {" "}{license.label}
+                {license.url && (
+                  <>
+                    {" · "}
+                    <a href={license.url}>license link</a>
+                  </>
+                )}
+              </dd>
+              {challenge.provenance.source_url && (
+                <>
+                  <dt>Source</dt>
+                  <dd><a href={challenge.provenance.source_url}>{challenge.provenance.source_url}</a></dd>
+                </>
+              )}
+              {challenge.provenance.notes && (
+                <>
+                  <dt>Notes</dt>
+                  <dd>{challenge.provenance.notes}</dd>
+                </>
+              )}
+            </dl>
+          </div>
+
+          <div class="spec-block">
+            <h2>Benchmark focus</h2>
+            <dl>
+              <dt>Family</dt>
+              <dd><span class="badge accent">{challenge.family}</span></dd>
+              <dt>Complexity tier</dt>
+              <dd>{challenge.tier}</dd>
+              <dt>Prompt profile</dt>
+              <dd>{challenge.prompt_profile}</dd>
+              <dt>Question</dt>
+              <dd>{challenge.benchmark_question}</dd>
+              <dt>Capability dimensions</dt>
+              <dd><ul>{challenge.capability_dimensions.map((dimension) => <li>{dimension}</li>)}</ul></dd>
+            </dl>
+          </div>
+
+          <div class="spec-block">
+            <h2>Capability profile</h2>
+            <dl>
+              <dt>Environment</dt>
+              <dd>{challenge.capabilities.environment}</dd>
+              <dt>Skills</dt>
+              <dd>
+                <ul>
+                  {challenge.capabilities.skills.map((skill) => <li>{skill}</li>)}
+                </ul>
+              </dd>
+              {challenge.capabilities.tools && challenge.capabilities.tools.length > 0 && (
+                <>
+                  <dt>Tools</dt>
+                  <dd>
+                    <ul>
+                      {challenge.capabilities.tools.map((tool) => <li>{tool}</li>)}
+                    </ul>
+                  </dd>
+                </>
+              )}
+              {challenge.capabilities.constraints && challenge.capabilities.constraints.length > 0 && (
+                <>
+                  <dt>Constraints</dt>
+                  <dd>
+                    <ul>
+                      {challenge.capabilities.constraints.map((constraint) => <li>{constraint}</li>)}
+                    </ul>
+                  </dd>
+                </>
+              )}
+            </dl>
+          </div>
+
+          <div class="spec-block">
+            <h2>Budget</h2>
+            <dl>
+              <dt>Wall clock</dt>
+              <dd>
+                {challenge.budget.wall_clock_minutes == null
+                  ? "undeclared"
+                  : `${challenge.budget.wall_clock_minutes} minutes`}
+              </dd>
+              <dt>Output files</dt>
+              <dd>
+                {challenge.budget.output_files_max == null
+                  ? "undeclared"
+                  : `at most ${challenge.budget.output_files_max}`}
+              </dd>
+              <dt>Network</dt>
+              <dd>{challenge.budget.network_access ?? "undeclared"}</dd>
+              <dt>Notes</dt>
+              <dd>{challenge.budget.notes}</dd>
+            </dl>
+          </div>
+
+          <div class="spec-block">
+            <h2>One-shot policy</h2>
+            <dl>
+              <dt>Human follow-up</dt>
+              <dd><strong>{challenge.one_shot_policy.human_follow_up ? "allowed" : "none"}</strong></dd>
+              <dt>Internal iteration</dt>
+              <dd>{challenge.one_shot_policy.internal_iteration ? "allowed" : "forbidden"}</dd>
+              <dt>Notes</dt>
+              <dd>{challenge.one_shot_policy.notes}</dd>
+            </dl>
+          </div>
+
+          <div class="spec-block">
+            <h2>Expected artifacts</h2>
+            <div class="table-scroll">
+            <table class="data-table">
+              <caption>What a qualifying run must produce</caption>
+              <thead>
+                <tr><th scope="col">Path</th><th scope="col">Kind</th><th scope="col">Required</th></tr>
+              </thead>
+              <tbody>
+                {
+                  challenge.artifacts.map((artifact) => (
+                    <tr>
+                      <td><code>{artifact.path}</code><br /><small style="color: var(--ink-muted);">{artifact.description}</small></td>
+                      <td>{artifact.kind}</td>
+                      <td>{artifact.required ? "yes" : "optional"}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+          {challenge.evaluator && (
+            <div class="spec-block">
+              <h2>Public evaluator</h2>
+              <dl>
+                <dt>Runtime</dt>
+                <dd>{challenge.evaluator.runtime}</dd>
+                <dt>Entrypoint</dt>
+                <dd><code>{challenge.evaluator.path}</code></dd>
+                <dt>SHA-256</dt>
+                <dd><span class="hash" title={challenge.evaluator.sha256}>{challenge.evaluator.sha256.slice(0, 32)}…{challenge.evaluator.sha256.slice(-8)}</span></dd>
+                <dt>Scope</dt>
+                <dd>{challenge.evaluator.notes}</dd>
+              </dl>
+            </div>
+          )}
+
+          <div class="spec-block">
+            <h2>Verification criteria</h2>
+            <div class="table-scroll">
+            <table class="data-table">
+              <caption>Evidence a result must attach</caption>
+              <thead>
+                <tr><th scope="col">Check</th><th scope="col">Method</th><th scope="col">Evidence</th></tr>
+              </thead>
+              <tbody>
+                {
+                  challenge.verification.map((item) => (
+                    <tr>
+                      <td><strong>{item.id}</strong><br /><small style="color: var(--ink-muted);">{item.description}</small></td>
+                      <td>{item.method}</td>
+                      <td>{item.evidence_required.join(", ")}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+
+        {challenge.origin === "external" && (
+          <div class="callout">
+            <span class="callout-title">External entry</span>
+            <p>
+              This is a linked community classic. OneShot hosts the brief text and
+              this description only; upstream outputs remain in the upstream
+              repository under whatever terms apply there. See{" "}
+              <a href={challenge.provenance.source_url}>the source repository</a>.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </article>
+</Base>
+
+<script is:inline>
+  document.addEventListener("click", function (event) {
+    var target = event.target instanceof Element ? event.target : null;
+    var button = target ? target.closest("[data-copy-target]") : null;
+    if (!button) return;
+    var panel = document.querySelector(button.getAttribute("data-copy-target"));
+    if (!panel) return;
+    var text = panel.textContent || "";
+    function done() {
+      var original = button.textContent;
+      button.textContent = "Copied";
+      window.setTimeout(function () {
+        button.textContent = original;
+      }, 1600);
+    }
+    function fallback() {
+      var range = document.createRange();
+      range.selectNodeContents(panel);
+      var selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      try {
+        window.document.execCommand("copy");
+        done();
+      } finally {
+        selection.removeAllRanges();
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+  });
+</script>

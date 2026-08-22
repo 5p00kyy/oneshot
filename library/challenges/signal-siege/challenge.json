@@ -1,0 +1,119 @@
+{
+  "schema": "oneshot.challenge/v1",
+  "version": "1.0.0",
+  "category": "playable-browser-game",
+  "family": "playable",
+  "tier": "showcase",
+  "prompt_profile": "benchmark",
+  "status": "draft",
+  "origin": "original",
+  "provenance": {
+    "license": {
+      "spdx": "MIT",
+      "label": "MIT (this repository)",
+      "url": "https://github.com/5p00kyy/oneshot/blob/main/LICENSE"
+    },
+    "attribution": "Challenge authored for the OneShot library.",
+    "notes": "Draft challenge authored for OneShot. No copied prompt prose or material interaction clone was found, but its title collides with existing public projects; it remains closed pending a rename and final originality review."
+  },
+  "capabilities": {
+    "environment": "Autonomous coding agent with file and shell access; output must run offline from file:// in current desktop Chrome, Firefox, Safari, or Edge.",
+    "tools": [
+      "file-read-write",
+      "shell",
+      "browser-or-dom-testing"
+    ],
+    "skills": [
+      "html5",
+      "css",
+      "vanilla-javascript",
+      "game-design",
+      "accessibility",
+      "testing"
+    ],
+    "constraints": [
+      "Single self-contained index.html plus README.md; no build step, framework, or external asset.",
+      "No runtime network access.",
+      "Keyboard-complete play is required."
+    ]
+  },
+  "execution_lane": "browser-static-single-file",
+  "budget": {
+    "wall_clock_minutes": 150,
+    "output_files_max": 2,
+    "network_access": "docs-only",
+    "notes": "A bounded one-brief game build; internal testing and repairs are expected."
+  },
+  "artifacts": [
+    {
+      "path": "index.html",
+      "kind": "html",
+      "required": true,
+      "description": "Complete self-contained playable game."
+    },
+    {
+      "path": "README.md",
+      "kind": "markdown",
+      "required": true,
+      "description": "Controls, rules, architecture, and honest verification record."
+    }
+  ],
+  "one_shot_policy": {
+    "human_follow_up": false,
+    "internal_iteration": true,
+    "notes": "One initial brief; the executor may test and repair within the same autonomous run."
+  },
+  "id": "signal-siege",
+  "title": "Signal Siege — keyboard tower defence",
+  "summary": "Can an agent ship a deterministic tower-defence loop with keyboard-only placement, distinct tactical roles, and a bounded set of defensible waves?",
+  "benchmark_question": "Can an agent ship a deterministic tower-defence loop with keyboard-only placement, distinct tactical roles, and a bounded set of defensible waves?",
+  "capability_dimensions": [
+    "planning",
+    "implementation",
+    "interaction-design",
+    "algorithmic-reasoning",
+    "verification",
+    "accessibility",
+    "offline-delivery"
+  ],
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "be9e035387ae2dc537adec3537f551f8844629bf1da60bf807653fa73211141c"
+  },
+  "verification": [
+    {
+      "id": "offline-boot",
+      "method": "automated-script",
+      "description": "The single HTML opens from file:// without console errors, external URLs, or network-capable runtime calls.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "keyboard-defence-loop",
+      "method": "interactive-check",
+      "description": "Keyboard-only controls select towers, place on pads, upgrade, start waves, and reset an ended game.",
+      "evidence_required": [
+        "transcript",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "deterministic-wave-data",
+      "method": "automated-script",
+      "description": "Five fixed waves and tower values are documented; the read-only snapshot agrees with visible build and active-wave states.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "battlefield-clarity",
+      "method": "visual-review",
+      "description": "A rendered play view visibly distinguishes path, enemies, selected build pad, tower ranges or attacks, and HUD.",
+      "evidence_required": [
+        "screenshot"
+      ]
+    }
+  ]
+}

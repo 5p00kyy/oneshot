@@ -1,0 +1,120 @@
+{
+  "schema": "oneshot.challenge/v1",
+  "version": "1.0.0",
+  "category": "playable-browser-game",
+  "family": "playable",
+  "tier": "showcase",
+  "prompt_profile": "benchmark",
+  "status": "draft",
+  "origin": "original",
+  "provenance": {
+    "license": {
+      "spdx": "MIT",
+      "label": "MIT (this repository)",
+      "url": "https://github.com/5p00kyy/oneshot/blob/main/LICENSE"
+    },
+    "attribution": "Challenge authored for the OneShot library.",
+    "notes": "Draft challenge authored for OneShot. Review found material title and mechanic overlap with earlier public gravity-flip games, so activation requires a substantially revised new version rather than a cosmetic rename. The existing disputed result preserves the exact prompt and evidence it executed."
+  },
+  "capabilities": {
+    "environment": "Autonomous coding agent with file and shell access; output must run offline from file:// in current desktop Chrome, Firefox, Safari, or Edge.",
+    "tools": [
+      "file-read-write",
+      "shell",
+      "browser-or-dom-testing"
+    ],
+    "skills": [
+      "html5",
+      "css",
+      "vanilla-javascript",
+      "game-design",
+      "accessibility",
+      "testing"
+    ],
+    "constraints": [
+      "Single self-contained index.html plus README.md; no build step, framework, or external asset.",
+      "No runtime network access.",
+      "Keyboard-complete play is required."
+    ]
+  },
+  "execution_lane": "browser-static-single-file",
+  "budget": {
+    "wall_clock_minutes": 150,
+    "output_files_max": 2,
+    "network_access": "docs-only",
+    "notes": "A bounded one-brief game build; internal testing and repairs are expected."
+  },
+  "artifacts": [
+    {
+      "path": "index.html",
+      "kind": "html",
+      "required": true,
+      "description": "Complete self-contained playable game."
+    },
+    {
+      "path": "README.md",
+      "kind": "markdown",
+      "required": true,
+      "description": "Controls, rules, architecture, and honest verification record."
+    }
+  ],
+  "one_shot_policy": {
+    "human_follow_up": false,
+    "internal_iteration": true,
+    "notes": "One initial brief; the executor may test and repair within the same autonomous run."
+  },
+  "id": "gravshift",
+  "title": "Gravshift — gravity-flip platformer",
+  "summary": "Can an agent deliver stable gravity-flip platforming physics, keyboard-only progression, checkpoints, and a complete multi-room finish in one offline HTML file?",
+  "benchmark_question": "Can an agent deliver stable gravity-flip platforming physics, keyboard-only progression, checkpoints, and a complete multi-room finish in one offline HTML file?",
+  "capability_dimensions": [
+    "planning",
+    "implementation",
+    "interaction-design",
+    "state-management",
+    "debugging",
+    "verification",
+    "accessibility",
+    "offline-delivery"
+  ],
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "481dd6b7f94d87fb1131c2fe2317b9dd27a9aab99cf170ba2a191032728d7c46"
+  },
+  "verification": [
+    {
+      "id": "offline-boot",
+      "method": "automated-script",
+      "description": "The single HTML opens from file:// without console errors, external URLs, or network-capable runtime calls.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "gravity-platform-loop",
+      "method": "interactive-check",
+      "description": "Keyboard play moves, jumps, flips gravity, pauses, dies, recovers at a checkpoint, and restarts.",
+      "evidence_required": [
+        "transcript",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "deterministic-rooms",
+      "method": "automated-script",
+      "description": "Four fixed rooms, goals, checkpoints, and gravity-dependent obstacles are documented; the read-only snapshot agrees with visible room and recovery states.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "visual-readability",
+      "method": "visual-review",
+      "description": "A rendered play view makes player, hazards, gravity direction, room goal, and HUD readable together.",
+      "evidence_required": [
+        "screenshot"
+      ]
+    }
+  ]
+}

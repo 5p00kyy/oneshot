@@ -1,0 +1,119 @@
+{
+  "schema": "oneshot.challenge/v1",
+  "version": "1.0.0",
+  "category": "playable-browser-game",
+  "family": "playable",
+  "tier": "showcase",
+  "prompt_profile": "benchmark",
+  "status": "draft",
+  "origin": "original",
+  "provenance": {
+    "license": {
+      "spdx": "MIT",
+      "label": "MIT (this repository)",
+      "url": "https://github.com/5p00kyy/oneshot/blob/main/LICENSE"
+    },
+    "attribution": "Challenge authored for the OneShot library.",
+    "notes": "Draft challenge authored for OneShot. No copied prompt prose or material interaction clone was found, but its title collides with existing public projects; it remains closed pending a rename and final originality review."
+  },
+  "capabilities": {
+    "environment": "Autonomous coding agent with file and shell access; output must run offline from file:// in current desktop Chrome, Firefox, Safari, or Edge.",
+    "tools": [
+      "file-read-write",
+      "shell",
+      "browser-or-dom-testing"
+    ],
+    "skills": [
+      "html5",
+      "css",
+      "vanilla-javascript",
+      "game-design",
+      "accessibility",
+      "testing"
+    ],
+    "constraints": [
+      "Single self-contained index.html plus README.md; no build step, framework, or external asset.",
+      "No runtime network access.",
+      "Keyboard-complete play is required."
+    ]
+  },
+  "execution_lane": "browser-static-single-file",
+  "budget": {
+    "wall_clock_minutes": 150,
+    "output_files_max": 2,
+    "network_access": "docs-only",
+    "notes": "A bounded one-brief game build; internal testing and repairs are expected."
+  },
+  "artifacts": [
+    {
+      "path": "index.html",
+      "kind": "html",
+      "required": true,
+      "description": "Complete self-contained playable game."
+    },
+    {
+      "path": "README.md",
+      "kind": "markdown",
+      "required": true,
+      "description": "Controls, rules, architecture, and honest verification record."
+    }
+  ],
+  "one_shot_policy": {
+    "human_follow_up": false,
+    "internal_iteration": true,
+    "notes": "One initial brief; the executor may test and repair within the same autonomous run."
+  },
+  "id": "neon-courier",
+  "title": "Neon Courier — top-down delivery pursuit",
+  "summary": "Can an agent construct a readable, deterministic delivery-and-pursuit game with escalating pressure, full keyboard control, and a complete win/lose loop?",
+  "benchmark_question": "Can an agent construct a readable, deterministic delivery-and-pursuit game with escalating pressure, full keyboard control, and a complete win/lose loop?",
+  "capability_dimensions": [
+    "planning",
+    "implementation",
+    "interaction-design",
+    "state-management",
+    "verification",
+    "accessibility",
+    "offline-delivery"
+  ],
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "33f090f1894a63ded148613fe2be52d1a5ef2b737191b6b91d562ec57988cfda"
+  },
+  "verification": [
+    {
+      "id": "offline-boot",
+      "method": "automated-script",
+      "description": "The single HTML opens from file:// without console errors, external URLs, or network-capable runtime calls.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "delivery-loop",
+      "method": "interactive-check",
+      "description": "Keyboard play can pick up a parcel, deliver it, dash, pause, take damage, and restart.",
+      "evidence_required": [
+        "transcript",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "deterministic-routes",
+      "method": "automated-script",
+      "description": "The five delivery routes and patrol escalation are fixed; a fresh restart and the read-only snapshot reproduce the opening and post-delivery states.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "visual-readability",
+      "method": "visual-review",
+      "description": "A rendered desktop view makes objective, city obstacles, drones, and integrity HUD legible together.",
+      "evidence_required": [
+        "screenshot"
+      ]
+    }
+  ]
+}

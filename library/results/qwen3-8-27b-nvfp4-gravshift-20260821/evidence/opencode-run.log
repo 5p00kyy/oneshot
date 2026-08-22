@@ -1,0 +1,33 @@
+timestamp=2026-08-21T09:13:55.963Z level=INFO run=4ca9236c message="creating instance" directory=<run-root>/gravshift/work
+timestamp=2026-08-21T09:13:55.966Z level=INFO run=4ca9236c message=fromDirectory directory=<run-root>/gravshift/work
+timestamp=2026-08-21T09:13:56.061Z level=INFO run=4ca9236c message=bootstrapping directory=<run-root>/gravshift/work
+timestamp=2026-08-21T09:13:56.080Z level=INFO run=4ca9236c message=loading path=<home>/.config/opencode/config.json
+timestamp=2026-08-21T09:13:56.081Z level=INFO run=4ca9236c message=loading path=<home>/.config/opencode/opencode.json
+timestamp=2026-08-21T09:13:56.091Z level=INFO run=4ca9236c message=loading path=<home>/.config/opencode/opencode.jsonc
+timestamp=2026-08-21T09:13:56.101Z level=INFO run=4ca9236c message=loading path=<run-root>/harness/opencode.json
+timestamp=2026-08-21T09:13:56.138Z level=INFO run=4ca9236c message=loading path=<home>/.opencode/opencode.json
+timestamp=2026-08-21T09:13:56.139Z level=INFO run=4ca9236c message=loading path=<home>/.opencode/opencode.jsonc
+timestamp=2026-08-21T09:13:56.248Z level=INFO run=4ca9236c message="all LSPs are disabled"
+timestamp=2026-08-21T09:13:56.250Z level=INFO run=4ca9236c message="all formatters are disabled"
+timestamp=2026-08-21T09:13:56.250Z level=INFO run=4ca9236c message=init
+timestamp=2026-08-21T09:13:56.550Z level=INFO run=4ca9236c message=created id=ses_fdc66d1b9ffebExOMWD99dbDmp slug=happy-wolf version=1.18.18 projectID=global directory=<run-root>/gravshift/work path="" workspaceID=undefined parentID=undefined title="OneShot Gravshift — local Qwen3.8 27B direct" agent=undefined model=undefined metadata=undefined permission="[{\"permission\":\"question\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"plan_enter\",\"pattern\":\"*\",\"action\":\"deny\"},{\"permission\":\"plan_exit\",\"pattern\":\"*\",\"action\":\"deny\"}]" cost=0 tokens.input=0 tokens.output=0 tokens.reasoning=0 tokens.cache.read=0 tokens.cache.write=0 time.created=1787303636550 time.updated=1787303636550
+timestamp=2026-08-21T09:13:56.655Z level=INFO run=4ca9236c message="event connected"
+timestamp=2026-08-21T09:13:57.388Z level=ERROR run=4ca9236c message="Failed to fetch models.dev" cause="Cause([Fail(HttpClientError: Transport error (GET https://models.opencode.ai/api.json) (cause: Error: Unable to connect. Is the computer able to access the url?))])"
+timestamp=2026-08-21T09:13:57.484Z level=INFO run=4ca9236c message=loop session.id=ses_fdc66d1b9ffebExOMWD99dbDmp step=0
+timestamp=2026-08-21T09:13:57.591Z level=INFO run=4ca9236c message=initialized
+timestamp=2026-08-21T09:13:57.610Z level=INFO run=4ca9236c message=tracking hash=4b825dc642cb6eb9a060e54bf8d69288fbee4904 cwd=<run-root>/gravshift/work git=<home>/.local/share/opencode/snapshot/global/448cdf9ea59878dbe7e4cf0a07e29c3f281e276f
+timestamp=2026-08-21T09:13:57.624Z level=INFO run=4ca9236c message="shell tool using shell" shell=/usr/bin/bash
+timestamp=2026-08-21T09:13:57.694Z level=WARN run=4ca9236c message="server unavailable" key=context7 type=remote status=failed
+timestamp=2026-08-21T09:13:57.697Z level=INFO run=4ca9236c message=init count=1
+timestamp=2026-08-21T09:13:57.864Z level=INFO run=4ca9236c message="watcher backend" directory=<run-root>/gravshift/work platform=linux backend=inotify
+timestamp=2026-08-21T09:13:57.876Z level=INFO run=4ca9236c message="project copy refresh started" projectID=global
+timestamp=2026-08-21T09:13:57.879Z level=INFO run=4ca9236c message="project copy refresh done" projectID=global updated=[] removed=[]
+timestamp=2026-08-21T09:13:58.731Z level=INFO run=4ca9236c message="booting location services" directory=<run-root>/gravshift/work workspaceID=undefined
+timestamp=2026-08-21T09:13:58.747Z level=INFO run=4ca9236c message=process session.id=ses_fdc66d1b9ffebExOMWD99dbDmp messageID=msg_0239931f20013V5eXogCfnnEBl
+timestamp=2026-08-21T09:13:58.751Z level=INFO run=4ca9236c message=stream providerID=vllm modelID=qwen3.8-27b-nvfp4 session.id=ses_fdc66d1b9ffebExOMWD99dbDmp small=false agent=build mode=primary
+timestamp=2026-08-21T09:13:58.766Z level=INFO run=4ca9236c message="llm runtime selected" llm.runtime=ai-sdk llm.provider=vllm llm.model=qwen3.8-27b-nvfp4
+timestamp=2026-08-21T09:14:56.435Z level=INFO run=4ca9236c message=cleanup prune=7.days
+timestamp=2026-08-21T09:24:55.404Z level=INFO run=4ca9236c message=tracking hash=4b825dc642cb6eb9a060e54bf8d69288fbee4904 cwd=<run-root>/gravshift/work git=<home>/.local/share/opencode/snapshot/global/448cdf9ea59878dbe7e4cf0a07e29c3f281e276f
+timestamp=2026-08-21T09:24:55.456Z level=INFO run=4ca9236c message=loop session.id=ses_fdc66d1b9ffebExOMWD99dbDmp step=1
+timestamp=2026-08-21T09:24:55.459Z level=INFO run=4ca9236c message="exiting loop" session.id=ses_fdc66d1b9ffebExOMWD99dbDmp
+timestamp=2026-08-21T09:24:55.478Z level=INFO run=4ca9236c message="disposing instance" directory=<run-root>/gravshift/work

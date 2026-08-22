@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      actions: read
       contents: read
       id-token: write
       attestations: write
@@ -50,6 +51,24 @@ jobs:
           git fetch origin main --no-tags
           if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
             echo "Release commit is not reachable from main: ${GITHUB_SHA}" >&2
+            exit 1
+          fi
+
+      - name: Verify Pages deployment for release commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          SUCCESSFUL_RUNS=$(gh api --method GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/site-build.yml/runs" \
+            -f branch=main \
+            -f event=push \
+            -f status=success \
+            -f head_sha="${GITHUB_SHA}" \
+            -f per_page=1 \
+            --jq '.total_count')
+          if [ "${SUCCESSFUL_RUNS}" -lt 1 ]; then
+            echo "No successful Pages workflow run exists for release commit ${GITHUB_SHA}" >&2
             exit 1
           fi
 

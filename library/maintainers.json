@@ -1,0 +1,10 @@
+{
+  "schema": "oneshot.maintainers/v1",
+  "description": "Canonical maintainer identity labels used to check the shape of review attestations.",
+  "identities": [
+    {
+      "id": "oneshot-maintainers",
+      "label": "OneShot project maintainers"
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "schema": "oneshot.result/v2",
+  "id": "deepseek-v4-flash-loopback-20260821",
+  "challenge": {
+    "id": "loopback",
+    "version": "1.0.0"
+  },
+  "run_class": "canonical",
+  "run_lane": "agentic-self-review",
+  "executed_at": "2026-08-21",
+  "executor": {
+    "model": {
+      "name": "DeepSeek V4 Flash",
+      "version": "0731",
+      "snapshot_id": "openrouter/deepseek/deepseek-v4-flash-0731"
+    },
+    "agent": {
+      "name": "OpenCode",
+      "version": "1.18.1",
+      "profile": "build"
+    },
+    "host": {
+      "name": "OpenClaw benchmark runner",
+      "version": "Linux 6.8.12-20-pve x86_64"
+    },
+    "identity_notes": "Direct OpenCode run. OpenCode events and session database independently record provider openrouter and model deepseek/deepseek-v4-flash-0731."
+  },
+  "status": "disputed",
+  "claim": {
+    "passed": false,
+    "summary": "The model produced a recognizable offline puzzle game and reported all checks passing, but independent fresh-browser validation could not complete Level 1 at its stated par. Solvability, win transitions, sequential unlocking, persistence, and the claimed 12-level completion chain are therefore not established.",
+    "completed_at": "2026-08-21"
+  },
+  "criterion_outcomes": [
+    {
+      "id": "boot-offline",
+      "passed": true,
+      "evidence_refs": [
+        "independent-validation",
+        "desktop-play"
+      ],
+      "notes": "Loaded from file:// in a fresh Chromium context with only the document request and no external URL, fetch, XHR, WebSocket, or import references."
+    },
+    {
+      "id": "core-loop",
+      "passed": false,
+      "evidence_refs": [
+        "independent-validation",
+        "desktop-play",
+        "opencode-transcript"
+      ],
+      "notes": "Pointer and keyboard rotation, undo, reset, and locked-level behavior worked. Exhaustive testing of all 81 ordered two-click sequences for Level 1 produced no completion at the stated par, so the core progression loop did not pass."
+    },
+    {
+      "id": "levels-solvable",
+      "passed": false,
+      "evidence_refs": [
+        "independent-validation",
+        "model-verification"
+      ],
+      "notes": "The model-authored verification log claims 12/12 levels, but an independent fresh-browser run could not establish even the Level 1 completion needed to reach the remaining levels."
+    },
+    {
+      "id": "persistence-recovery",
+      "passed": false,
+      "evidence_refs": [
+        "independent-validation",
+        "mobile-play"
+      ],
+      "notes": "localStorage code is present, but completion and unlock state could not be created through the tested UI, so reload recovery was not established."
+    },
+    {
+      "id": "keyboard-complete",
+      "passed": false,
+      "evidence_refs": [
+        "independent-validation",
+        "opencode-transcript"
+      ],
+      "notes": "Arrow navigation, Enter rotation, focus indication, named controls, and live-region structure worked. Keyboard-only completion of Levels 1 through 3 could not be demonstrated because Level 1 did not reach a win state."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "index.html",
+      "sha256": "ba0f765cee16aa03d56f84ba401a2f21a5621011b112e5f1dda69df42e22c623",
+      "kind": "html",
+      "description": "Exact generated index.html bytes from the direct model-pinned run."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "artifact-preview",
+      "kind": "screenshot",
+      "location": "evidence/artifact-preview.png",
+      "description": "Unmodified pixel crop of the independent desktop Level 1 screenshot, used only as the gallery preview.",
+      "sha256": "691293fae5ff46b054b69927eb6389dc05e8b0b57b5f3f05069d8dd0faf08a9a"
+    },
+    {
+      "id": "opencode-transcript",
+      "kind": "transcript",
+      "location": "evidence/events.jsonl",
+      "description": "Path-redacted structured OpenCode event stream from the direct model-pinned run.",
+      "sha256": "8b5dedc7060a196134228f7a26a8c1f5c681206cbb8819c4df549187e733d0d9"
+    },
+    {
+      "id": "run-log",
+      "kind": "log",
+      "location": "evidence/run.log",
+      "description": "Path-redacted direct runner log including command, model pin, exit code, and runtime.",
+      "sha256": "55fca229ddc5a89c7181d9dcf0c062d51c396710c4a5dc95e10c3689411a2413"
+    },
+    {
+      "id": "identity-log",
+      "kind": "log",
+      "location": "evidence/opencode-identity.json",
+      "description": "Path-redacted OpenCode database extract confirming provider and model identity.",
+      "sha256": "38c2b5813c00cb1371a652494af2795992f6fe503f260b16eb60ba925c0f48dd"
+    },
+    {
+      "id": "model-readme",
+      "kind": "log",
+      "location": "evidence/model-readme.txt",
+      "description": "Model-authored README retained as supporting run evidence rather than a published challenge artifact.",
+      "sha256": "343a0ddfdf0cb4e4e91841fbdf7a9f2c9a10a98218b475ba29a04e010f8d92a6"
+    },
+    {
+      "id": "model-verification",
+      "kind": "log",
+      "location": "evidence/model-verification.log",
+      "description": "Model-authored 19/19 verification claim, retained as disputed evidence rather than accepted proof.",
+      "sha256": "f9cca783c61e3875edc563d46f7926752ce27d103d0506e931c7b766c6b088c4"
+    },
+    {
+      "id": "independent-validation",
+      "kind": "log",
+      "location": "evidence/independent-validation.txt",
+      "description": "Independent fresh-browser black-box validation report.",
+      "sha256": "44afd3d45a50f89ef536e11a3830a180f0998de8c4c31daf8dfd251f31c0e61e"
+    },
+    {
+      "id": "desktop-start",
+      "kind": "screenshot",
+      "location": "evidence/loopback-desktop-start.png",
+      "description": "Desktop start screen in a fresh Chromium context.",
+      "sha256": "33dc894e8e10a97a8079e5d2314f823183f7560c3c3492dd343b1f54bd5eefa8"
+    },
+    {
+      "id": "desktop-play",
+      "kind": "screenshot",
+      "location": "evidence/loopback-desktop-play.png",
+      "description": "Desktop Level 1 board after entering play.",
+      "sha256": "a7b6c25b5fda61609509077c934ebe3a06f2079575955c1619d9465a6c2a2fbd"
+    },
+    {
+      "id": "mobile-start",
+      "kind": "screenshot",
+      "location": "evidence/loopback-mobile-start.png",
+      "description": "Mobile start screen at 390 by 844 pixels.",
+      "sha256": "8601505c5cb0e0d584b0c2444468c98105ae82aa7434bc89c9dafef3b0ca5a7b"
+    },
+    {
+      "id": "mobile-play",
+      "kind": "screenshot",
+      "location": "evidence/loopback-mobile-play.png",
+      "description": "Mobile Level 1 board at 390 by 844 pixels.",
+      "sha256": "f1bb9afb7603dd6d104aab056e6d25bad764671db3d65d15a226eef9e35c115e"
+    },
+    {
+      "id": "artifact-checksums",
+      "kind": "checksum-file",
+      "location": "evidence/SHA256SUMS.txt",
+      "description": "SHA-256 checksums for the published artifact, prompt, path-redacted run records, reports, and screenshots.",
+      "sha256": "55b1d8e3c6e87a07abb8431872bd74855c5e598b8c178c21c6c52e4b8dfceb75"
+    },
+    {
+      "id": "reproduction-notes",
+      "kind": "reproduction-script",
+      "location": "evidence/reproduce.md",
+      "description": "Steps for reproducing offline boot, controls, and the independent Level 1 failure.",
+      "sha256": "b9a8ed01421b787db196bf06752954eda2122e046277ba4407703f998763405c"
+    }
+  ],
+  "reproducibility": {
+    "status": "not-reproducible",
+    "instructions_path": "evidence/reproduce.md",
+    "notes": "The artifact boots offline and basic controls can be reproduced. The claimed Level 1 par completion and downstream 12-level progression could not be reproduced from cleared browser state."
+  },
+  "budget_actual": {
+    "wall_clock_minutes": 39,
+    "output_files": 21,
+    "notes": "Direct run exited 0 after 2,363,053 ms. The workspace contained 21 files including build/test helpers; three top-level deliverables were index.html, README.md, and verification.log. The 21-file total exceeded the challenge maximum of three output files."
+  },
+  "prompt_echo": {
+    "sha256": "12f340fc380ae0c85eb5ed6fbebe90ebb10dfb82c0c93664fd1c666ba3f4d3a4"
+  }
+}

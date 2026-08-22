@@ -1,0 +1,79 @@
+---
+import Base from "../../layouts/base.astro";
+import { loadChallenges, withBase } from "../../lib/library";
+
+const challenges = loadChallenges();
+const activeCount = challenges.filter((challenge) => challenge.status === "active").length;
+const draftCount = challenges.filter((challenge) => challenge.status === "draft").length;
+---
+
+<Base
+  title="Challenge library"
+  description="Versioned one-shot challenges: frozen prompts, provenance, capability profiles, budgets, and verification criteria."
+  active="challenges"
+>
+  <section class="hero hero-page">
+    <div class="container">
+      <div class="hero-strip" aria-hidden="true">
+        <span>OS / REGISTER-01</span>
+        <span>{activeCount} ACTIVE · {draftCount} DRAFT</span>
+        <span>VERSIONED RECORDS</span>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-statement">
+          <p class="hero-overline">Challenge register</p>
+          <h1>Frozen briefs, <em>visible candidates.</em></h1>
+        </div>
+        <p class="lede">
+          Active records are frozen briefs. Draft records remain visible while
+          their evaluator, originality review, and calibration runs are completed.
+          Once active, an edit is a new version, not a quiet rewrite.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="All challenges">
+    <div class="container">
+      <div class="register-columns" aria-hidden="true">
+        <span>No.</span><span>Brief</span><span>Description</span><span>Class</span>
+      </div>
+      <ol class="challenge-list">
+        {
+          challenges.map((challenge) => (
+            <li>
+              <a class="row" href={withBase(`/challenges/${challenge.id}/`)}>
+                <span class="row-index" aria-hidden="true">{challenge.index}</span>
+                <div class="row-main">
+                  <h3>{challenge.title}</h3>
+                  <span class="row-badges">
+                    <span class="badge accent">{challenge.family}</span>
+                    <span class="badge">{challenge.tier}</span>
+                    <span class="badge">{challenge.category}</span>
+                    <span class="badge">{challenge.execution_lane}</span>
+                    <span class="badge" class:list={{ accent: challenge.origin === "external" }}>
+                      {challenge.origin}
+                    </span>
+                    {challenge.status !== "active" && <span class="badge">{challenge.status}</span>}
+                  </span>
+                </div>
+                <p class="row-summary">{challenge.summary}</p>
+                <span class="row-arrow" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="callout">
+        <span class="callout-title">Reading the badges</span>
+        <p>
+          <strong>external</strong> entries are community classics linked from
+          elsewhere — OneShot claims no ownership of them or their outputs.
+          <strong>original</strong> entries are authored in this repository under
+          its MIT license. Only <strong>active</strong> challenges are open for
+          new runs.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -50,7 +50,7 @@ The archive must contain one top-level `oneshot/` directory and no repository-on
 
 ## 3. Merge and Verify Main
 
-Commit the reviewed changes and push them to `main`. Wait for the `Validate` workflow to pass before tagging.
+Commit the reviewed changes on a feature branch, open a pull request, and require the `Validate` and `Site build and deploy` build jobs to pass. Review the diff and site artifact, then merge the pull request to `main`. Wait for the `Validate` workflow and Pages deployment to pass before tagging. The release workflow independently fails closed unless the exact release commit already has a successful `Site build and deploy` push run on `main`.
 
 Confirm the worktree is clean and record the release commit:
 
@@ -107,6 +107,21 @@ The pinned user installation command is:
 AGENT_ID=universal  # Replace with the ID for the target host when needed.
 gh skill install 5p00kyy/oneshot oneshot@vX.Y.Z --agent "$AGENT_ID" --scope user
 ```
+
+## 6. Verify the Lab Site
+
+Pull requests build and verify the Astro site without publishing it. A merge to
+`main` deploys the same verified `site/dist` bytes through GitHub Pages. The
+repository Pages source must be set to **GitHub Actions**.
+
+After the deployment job passes, verify:
+
+- <https://5p00kyy.github.io/oneshot/> and every generated route return 200;
+- stylesheet and asset URLs retain the `/oneshot/` base path;
+- challenge and result facts agree with the checked-in manifests;
+- HTML artifacts require an explicit click and retain the documented iframe
+  sandbox and document policy;
+- desktop and mobile layouts remain usable.
 
 ## Failure Recovery
 

@@ -1,0 +1,28 @@
+{
+  "expected_modelID": "deepseek/deepseek-v4-flash-0731",
+  "expected_providerID": "openrouter",
+  "identity_match": true,
+  "observed_message_routes": [
+    {
+      "agent": "build",
+      "mode": null,
+      "modelID": "deepseek/deepseek-v4-flash-0731",
+      "providerID": "openrouter",
+      "role": "user"
+    },
+    {
+      "agent": "build",
+      "mode": "build",
+      "modelID": "deepseek/deepseek-v4-flash-0731",
+      "providerID": "openrouter",
+      "role": "assistant"
+    }
+  ],
+  "session": {
+    "directory": "<run-root>",
+    "id": "ses_fddca9eacffeH9ZCRzDsSFynag",
+    "time_created": 1787280318803,
+    "time_updated": 1787282678003,
+    "title": "OneShot Loopback \u2014 DeepSeek V4 Flash 0731 direct"
+  }
+}

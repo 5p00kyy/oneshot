@@ -30,6 +30,16 @@ class RepositoryTests(unittest.TestCase):
         spec.loader.exec_module(module)
         return module
 
+    def load_repository_validator(self) -> ModuleType:
+        path = ROOT / "scripts" / "validate_repo.py"
+        spec = importlib.util.spec_from_file_location("oneshot_test_repository_validator", path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader if spec else None)
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        spec.loader.exec_module(module)
+        return module
+
     def run_command(self, *parts: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
         result = subprocess.run(
             [PYTHON, *parts],
@@ -56,10 +66,10 @@ class RepositoryTests(unittest.TestCase):
             skill_file = skill / "SKILL.md"
             text = skill_file.read_text(encoding="utf-8")
             text = text.replace(
-                '  version: "1.1.0"\n  category: "prompt-authoring"',
-                "    version: 1.1.0\n"
+                '  version: "1.2.0"\n  category: "prompt-authoring"',
+                "    version: 1.2.0\n"
                 "    category: prompt-authoring\n"
-                "    github-ref: refs/tags/v1.1.0\n"
+                "    github-ref: refs/tags/v1.2.0\n"
                 "    github-repo: https://github.com/5p00kyy/oneshot",
             )
             skill_file.write_text(text, encoding="utf-8", newline="\n")
@@ -74,6 +84,23 @@ class RepositoryTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, msg=result.stderr)
             self.assertIn("OK: oneshot skill is valid", result.stdout)
 
+    def test_public_hygiene_rejects_common_private_machine_paths(self) -> None:
+        validator = self.load_repository_validator()
+        private_paths = (
+            "/" + "home" + "/alice/project/secret.txt",
+            "/" + "Users" + "/alice/project/secret.txt",
+            "C:\\" + "Users" + r"\alice\project\secret.txt",
+        )
+        for private_path in private_paths:
+            with self.subTest(private_path=private_path):
+                with tempfile.TemporaryDirectory(prefix="oneshot-public-hygiene-test-") as temp:
+                    root = Path(temp)
+                    (root / "leak.txt").write_text(private_path, encoding="utf-8")
+                    validator.ROOT = root
+                    with redirect_stderr(io.StringIO()):
+                        with self.assertRaises(SystemExit):
+                            validator.validate_public_hygiene()
+
     def test_prompt_audit_accepts_complete_fixture(self) -> None:
         result = self.run_command(
             "skills/oneshot/scripts/audit_prompt.py",
@@ -82,15 +109,76 @@ class RepositoryTests(unittest.TestCase):
         )
         self.assertIn("No mechanical defects detected", result.stdout)
 
-    def test_prompt_audit_accepts_narrow_fixture_with_note(self) -> None:
+    def test_prompt_audit_accepts_narrow_extensive_fixture_with_note(self) -> None:
         result = self.run_command(
             "skills/oneshot/scripts/audit_prompt.py",
             "tests/fixtures/narrow-prompt.md",
             "--strict",
         )
         self.assertIn("Mechanical score: 100/100", result.stdout)
-        self.assertIn("Prompt is under 250 words", result.stdout)
+        self.assertIn("Extensive prompt is under 250 words", result.stdout)
         self.assertNotIn("WARNINGS", result.stdout)
+
+    def test_prompt_audit_accepts_one_sentence_brief(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-brief-test-") as temp:
+            prompt = Path(temp) / "brief.md"
+            prompt.write_text(
+                "Generate an SVG of a pelican riding a bicycle. Return only valid SVG and check that it renders.\n",
+                encoding="utf-8",
+            )
+            result = self.run_command(
+                "skills/oneshot/scripts/audit_prompt.py",
+                str(prompt),
+                "--profile",
+                "brief",
+                "--strict",
+            )
+            self.assertIn("Profile: brief", result.stdout)
+            self.assertIn("Headings: 0", result.stdout)
+            self.assertIn("Mechanical score: 100/100", result.stdout)
+
+    def test_prompt_audit_enforces_brief_and_benchmark_boundaries(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-profile-boundary-test-") as temp:
+            brief = Path(temp) / "brief.md"
+            brief.write_text("word " * 121, encoding="utf-8")
+            brief_result = self.run_command(
+                "skills/oneshot/scripts/audit_prompt.py",
+                str(brief),
+                "--profile",
+                "brief",
+                "--strict",
+                expected=1,
+            )
+            self.assertIn("120-word envelope", brief_result.stdout)
+
+            benchmark = Path(temp) / "benchmark.md"
+            benchmark.write_text("word " * 701, encoding="utf-8")
+            benchmark_result = self.run_command(
+                "skills/oneshot/scripts/audit_prompt.py",
+                str(benchmark),
+                "--profile",
+                "benchmark",
+                "--strict",
+                expected=1,
+            )
+            self.assertIn("700-word cap", benchmark_result.stdout)
+
+    def test_prompt_audit_rejects_benchmark_evaluator_leakage(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="oneshot-benchmark-leak-test-") as temp:
+            prompt = Path(temp) / "benchmark.md"
+            prompt.write_text(
+                "Create one offline HTML game. Hidden tests award points using scoring weights.\n",
+                encoding="utf-8",
+            )
+            result = self.run_command(
+                "skills/oneshot/scripts/audit_prompt.py",
+                str(prompt),
+                "--profile",
+                "benchmark",
+                "--strict",
+                expected=1,
+            )
+            self.assertIn("Contestant prompt leaks", result.stdout)
 
     def test_prompt_audit_rejects_incomplete_fixture(self) -> None:
         result = self.run_command(

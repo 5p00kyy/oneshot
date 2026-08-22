@@ -1,0 +1,15 @@
+{
+  "providerID": "vllm",
+  "modelID": "qwen3.8-27b-nvfp4",
+  "model_route": "vllm/qwen3.8-27b-nvfp4",
+  "configured_context_tokens": 122880,
+  "configured_output_tokens": 81920,
+  "opencode_effective_generation_cap_tokens": 32000,
+  "opencode_version": "1.18.18",
+  "agent": "build",
+  "run_exit_code": 0,
+  "run_runtime_ms": 661018,
+  "terminal_step_reason": "length",
+  "terminal_step_output_tokens": 32000,
+  "verification": "The path-redacted OpenCode run log records this providerID/modelID pair. The structured event stream records a single step ending at the OpenCode generation cap with no tool events."
+}

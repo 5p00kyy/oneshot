@@ -1,20 +1,19 @@
 # OneShot Skill Package
 
-`oneshot` is a portable Agent Skill for researching a serious request and turning it into a structured, self-contained, implementation-ready one-shot prompt for another model or agent.
+`oneshot` is a portable Agent Skill for turning a request into a proportionately scoped, self-contained one-shot prompt for another model or agent. It can stay at supplied-context-only R0 for narrow work or research material decisions at R1-R3 when the task warrants it.
 
 It is a **prompt-authoring skill**, not a skill that silently executes the underlying project.
 
 ## What it does
 
+- Selects Brief, Benchmark, or Extensive prompt depth independently from execution mode and R0-R3 research depth.
 - Distinguishes direct artifacts from agentic workspace builds, research tasks, and transformations.
-- Audits the target executor's actual capabilities and environment.
-- Performs calibrated research using authoritative sources.
-- Converts research into requirements, decisions, priorities, and acceptance tests.
-- Bounds ambition into a complete initial release or artifact.
-- Defines workflow gates, fallback behavior, and evidence-based completion.
-- Reviews prompts for contradictions, dependency errors, infeasible scope, weak verification, and unnecessary bulk.
+- Audits the target executor's actual capabilities and environment when those details affect the result.
+- Researches only facts that change feasibility, requirements, safety, or executor instructions.
+- Converts material context into requirements, decisions, priorities, and proportionate acceptance checks.
+- Bounds ambition into one complete outcome rather than padding a narrow task into a project plan.
+- Reviews prompts for contradictions, dependency errors, infeasible scope, weak verification, evaluator leakage, and unnecessary bulk.
 - Supports software, games, web products, research, data, automation, creative work, and documents.
-- Selects compact, standard, or master templates according to task complexity.
 
 ## Skill structure
 
@@ -35,6 +34,7 @@ oneshot/
 │   └── trigger-evals.json
 ├── references/
 │   ├── anti-patterns.md
+│   ├── calibration-profiles.md
 │   ├── domain-playbooks.md
 │   ├── prompt-architecture.md
 │   ├── quality-rubric.md
@@ -56,16 +56,16 @@ AGENT_ID=universal  # Or codex, claude-code, gemini-cli, opencode, openclaw, and
 gh skill install 5p00kyy/oneshot oneshot --agent "$AGENT_ID" --scope user
 ```
 
-Pin a reviewed release when reproducibility matters:
+Pin a reviewed release when reproducibility matters. The commands below target this source version; use `v1.2.0` only after the matching GitHub release exists:
 
 ```bash
-gh skill install 5p00kyy/oneshot oneshot@v1.1.0 --agent "$AGENT_ID" --scope user
+gh skill install 5p00kyy/oneshot oneshot@v1.2.0 --agent "$AGENT_ID" --scope user
 ```
 
-Preview first:
+Preview the same published tag first:
 
 ```bash
-gh skill preview 5p00kyy/oneshot oneshot@v1.1.0
+gh skill preview 5p00kyy/oneshot oneshot@v1.2.0
 ```
 
 See the [`gh skill install` manual](https://cli.github.com/manual/gh_skill_install) for the current host list and placement rules. The listed agent IDs are installation targets, not claims of full runtime testing on every host.

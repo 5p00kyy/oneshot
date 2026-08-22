@@ -1,0 +1,149 @@
+---
+import Base from "../layouts/base.astro";
+import { loadChallenges, loadResults, withBase } from "../lib/library";
+
+const allChallenges = loadChallenges();
+const challenges = allChallenges.filter((challenge) => challenge.status === "active");
+const results = loadResults();
+const verified = results.filter((result) => result.status === "verified");
+const featured = verified[0] ?? results[0];
+---
+
+<Base
+  title="OneShot"
+  description="OneShot is a public benchmark for complete one-shot briefs and evidence-backed agent runs."
+  active="home"
+>
+  <section class="hero hero-home">
+    <div class="container">
+      <p class="hero-overline">An evidence-first agent benchmark</p>
+      <div class="hero-home-grid">
+        <div class="hero-statement">
+          <h1>
+            <span>One brief.</span>
+            <span>No follow-up.</span>
+            <em>Evidence or it didn’t happen.</em>
+          </h1>
+          <p class="lede">
+            We freeze a complete brief, let an agent work without human rescue,
+            then publish the artifact, the record, and the awkward parts too.
+          </p>
+        </div>
+        {featured && (
+          <a class="hero-feature" href={withBase(`/results/${featured.id}/`)}>
+            <span class="hero-feature-bar"><span>Featured {featured.status} record</span><span>{featured.criteria_passed}/{featured.criteria_total} criteria</span></span>
+            {featured.preview_data_url && <img src={featured.preview_data_url} alt={featured.preview_alt} />}
+            <span class="hero-feature-caption">
+              <strong>{featured.challenge_id}</strong>
+              <span>{featured.model_name} · {featured.status}</span>
+            </span>
+          </a>
+        )}
+      </div>
+      <dl class="hero-register" aria-label="Current OneShot register">
+        <div><dt>Active challenges</dt><dd>{String(challenges.length).padStart(2, "0")}</dd></div>
+        <div><dt>Published runs</dt><dd>{String(results.length).padStart(2, "0")}</dd></div>
+        <div><dt>Verified</dt><dd>{String(verified.length).padStart(2, "0")}</dd></div>
+        <div><dt>Human follow-ups</dt><dd>00</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="protocol-heading">
+    <div class="container editorial-grid">
+      <div class="section-heading">
+        <span class="number" aria-hidden="true">01</span>
+        <h2 id="protocol-heading">The protocol is deliberately unforgiving.</h2>
+      </div>
+      <div class="prose prose-wide">
+        <p>
+          A useful benchmark has to preserve the whole attempt. OneShot records
+          the exact prompt, executor identity, output bytes, checksums, acceptance
+          evidence, and reproducibility limits. A polished artifact can still fail.
+          A failed run can still teach us something.
+        </p>
+        <p class="text-link"><a href={withBase("/methodology/")}>Read the full methodology →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="challenges-heading">
+    <div class="container">
+      <div class="section-heading section-heading-row">
+        <div><span class="number" aria-hidden="true">02</span><h2 id="challenges-heading">Current challenges</h2></div>
+        <a class="text-link" href={withBase("/challenges/")}>View the register →</a>
+      </div>
+      {
+        challenges.length === 0 ? (
+          <div class="empty-state">
+            <span class="empty-count">[ 0 ACTIVE ]</span>
+            <h3>No challenge is open for runs yet</h3>
+            <p>Draft candidates remain visible in the register while originality, evaluator, and calibration gates are completed.</p>
+          </div>
+        ) : (
+          <ol class="challenge-list">
+            {challenges.map((challenge) => (
+              <li>
+                <a class="row" href={withBase(`/challenges/${challenge.id}/`)}>
+                  <span class="row-index" aria-hidden="true">{challenge.index}</span>
+                  <div class="row-main">
+                    <h3>{challenge.title}</h3>
+                    <span class="row-badges">
+                      <span class="badge accent">{challenge.family}</span>
+                      <span class="badge">{challenge.category}</span>
+                      <span class="badge" class:list={{ accent: challenge.origin === "external" }}>
+                        {challenge.origin}
+                      </span>
+                    </span>
+                  </div>
+                  <p class="row-summary">{challenge.summary}</p>
+                  <span class="row-arrow" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="section section-results" aria-labelledby="evidence-heading">
+    <div class="container">
+      <div class="section-heading section-heading-row">
+        <div>
+          <span class="number" aria-hidden="true">03</span>
+          <h2 id="evidence-heading">Latest evidence</h2>
+        </div>
+        <a class="text-link" href={withBase("/results/")}>Open the public ledger →</a>
+      </div>
+      {
+        results.length === 0 ? (
+          <div class="empty-state">
+            <span class="empty-count">[ 0 / 0 ]</span>
+            <h3>No published runs yet</h3>
+            <p>The absence is real. No placeholders, sample scores, or decorative success stories.</p>
+          </div>
+        ) : (
+          <ol class="result-summary-list">
+            {results.slice(0, 3).map((result, index) => (
+              <li>
+                <a href={withBase(`/results/${result.id}/`)}>
+                  <span class="row-index">{String(index + 1).padStart(2, "0")}</span>
+                  <span class="result-summary-main">
+                    <strong>{result.challenge_id}</strong>
+                    <small>{result.executor_summary}</small>
+                  </span>
+                  <span class="result-summary-meta">
+                    <span class="status-mark" class:list={{ verified: result.status === "verified", disputed: result.status === "disputed" }}>{result.status}</span>
+                    <span>{result.evidence_count} evidence files</span>
+                  </span>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        )
+      }
+    </div>
+  </section>
+</Base>

@@ -1,6 +1,6 @@
 interface:
   display_name: "OneShot"
-  short_description: "Research and author rigorous one-shot prompts"
-  default_prompt: "Research this request and produce a standalone, implementation-ready one-shot prompt for another capable model or agent."
+  short_description: "Author proportionately scoped one-shot prompts"
+  default_prompt: "Turn this request into a standalone, proportionately scoped one-shot prompt for another capable model or agent. Research only when the selected depth requires it."
 policy:
   allow_implicit_invocation: true

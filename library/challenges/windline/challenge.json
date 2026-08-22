@@ -1,0 +1,149 @@
+{
+  "schema": "oneshot.challenge/v1",
+  "id": "windline",
+  "version": "1.0.0",
+  "title": "Windline — ordered glider landing",
+  "family": "playable",
+  "tier": "compact",
+  "prompt_profile": "benchmark",
+  "category": "playable-browser-game",
+  "status": "draft",
+  "origin": "original",
+  "summary": "Can an executor produce a deterministic one-file glider microgame with ordered targets, readable lift zones, recoverable failure, and a precision landing loop?",
+  "benchmark_question": "Can an executor implement and verify one deterministic flight-like control loop with ordered targets, failure recovery, and a constrained landing state in a single offline file?",
+  "capability_dimensions": [
+    "implementation",
+    "interaction-design",
+    "state-management",
+    "verification",
+    "accessibility",
+    "offline-delivery"
+  ],
+  "prompt": {
+    "path": "prompt.md",
+    "sha256": "03c541cc341eea3040a59bf800e7305c9ba90072c63d5ccae30c620ec2ae4b54"
+  },
+  "evaluator": {
+    "path": "evaluator/evaluate.mjs",
+    "sha256": "d2b30cf0110041c8e7ed7e3780a9d86a86551462488e887b1965c17356cea3db",
+    "runtime": "node22-chromium",
+    "notes": "Linux runner fails closed without bubblewrap user/network namespaces or Chromium's own sandbox, stages only index.html, blocks and records page egress before transmission, applies bounded source/request/error/deadline limits, and computes one final offline outcome after a late-event quiet window. It awards 70 objective points and captures controlled screenshots; ordered completion and presentation reserve 30 points for independent E2 review."
+  },
+  "provenance": {
+    "license": {
+      "spdx": "MIT",
+      "label": "MIT (this repository)",
+      "url": "https://github.com/5p00kyy/oneshot/blob/main/LICENSE"
+    },
+    "attribution": "Original challenge authored for the OneShot compact core.",
+    "notes": "Candidate challenge. Calibration completed on 2026-08-22, but activation was rejected: one run failed a critical controls criterion, the other violated the one-file output protocol, and both failed the full-course readability requirement. It remains closed until the readability contract is revised and a new version passes fresh calibration."
+  },
+  "capabilities": {
+    "environment": "One frozen prompt producing a browser artifact that runs offline from file:// in current desktop Chromium, Firefox, Safari, or Edge.",
+    "tools": [
+      "file-read-write",
+      "optional-browser-testing"
+    ],
+    "skills": [
+      "html5",
+      "css",
+      "vanilla-javascript",
+      "interaction-design",
+      "accessibility"
+    ],
+    "constraints": [
+      "Exactly one self-contained index.html deliverable; no external assets, dependencies, network calls, or build step.",
+      "One fixed deterministic course with keyboard-complete play.",
+      "Contestant prompt excludes evaluator mechanics, weights, hidden variants, and retry policy."
+    ]
+  },
+  "execution_lane": "browser-static-single-file",
+  "budget": {
+    "wall_clock_minutes": 30,
+    "output_files_max": 1,
+    "network_access": "none",
+    "notes": "T1 compact budget. Runtime is a harness control independent of tier; agentic and raw attempts must be recorded in separate result lanes."
+  },
+  "verification": [
+    {
+      "id": "offline-boot",
+      "method": "automated-script",
+      "description": "The artifact is one self-contained HTML file that boots from file:// without undeclared resource or network requests.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "snapshot-contract",
+      "method": "automated-script",
+      "description": "The read-only Windline snapshot has the documented shape, normalized state, and fresh-object isolation.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "start-and-steering",
+      "method": "automated-script",
+      "description": "Enter starts a flying state and both vertical steering directions change documented motion state.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "ordered-chimes-and-landing",
+      "method": "interactive-check",
+      "description": "Out-of-order contact is rejected, chimes collect in order, hard contact crashes, and a gentle final rooftop landing reaches success.",
+      "evidence_required": [
+        "transcript",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "pause-crash-restart",
+      "method": "automated-script",
+      "description": "Pause freezes motion, a controlled boundary or impact crash is reachable, and R restores a clean run.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "deterministic-course",
+      "method": "automated-script",
+      "description": "Chime, thermal, and rooftop geometry stays unchanged across fresh restarts.",
+      "evidence_required": [
+        "log"
+      ]
+    },
+    {
+      "id": "keyboard-and-responsive",
+      "method": "automated-script",
+      "description": "Required labelled controls exist, keyboard help is visible, and the page fits the 390 by 844 viewport without material overflow.",
+      "evidence_required": [
+        "log",
+        "screenshot"
+      ]
+    },
+    {
+      "id": "visual-readability",
+      "method": "visual-review",
+      "description": "Glider, thermals, ordered chimes, rooftop target, current objective, and state feedback are readable in controlled desktop and mobile captures.",
+      "evidence_required": [
+        "screenshot"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "index.html",
+      "kind": "html",
+      "required": true,
+      "description": "Complete self-contained Windline game."
+    }
+  ],
+  "one_shot_policy": {
+    "human_follow_up": false,
+    "internal_iteration": true,
+    "notes": "One frozen brief per attempt. Agentic self-review may test and repair inside its fixed run; raw completion may not."
+  }
+}
